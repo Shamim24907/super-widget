@@ -1,0 +1,520 @@
+/**
+ * Super Widget - Image Shapes
+ * Every shape is plain CSS: border-radius or clip-path on the picture, plus up to two
+ * decor layers (.spw-is__d1 / __d2). Shapes only set CSS variables and positions, so
+ * the Elementor controls (which write the same variables on the widget) always win.
+ *
+ * Insets are "top right bottom left" in % of the box, so every collage scales.
+ */
+.spw-is {
+	--is-acc: #3f8f4a;
+	--is-acc2: #f6c744;
+	--is-lw: 2px;
+	--is-off: 7%;
+	--is-ar: 1 / 1;
+	--is-i1: 0;
+	--is-i2: 0;
+	--is-i3: 0;
+	--is-shc: rgba(20, 30, 20, 0.2);
+	--is-shb: 24px;
+	--is-shy: 14px;
+	--is-stripe: rgba(255, 255, 255, 0.92);
+	--is-sw: 2.4%;
+	--is-bc: #fff;
+	--is-hz: 1.08;
+	--is-hd: 500ms;
+	--is-ad: 800ms;
+	--is-adl: 0ms;
+	--is-fd: 10px;
+	--is-fs: 5s;
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+}
+
+.spw-is *,
+.spw-is *::before,
+.spw-is *::after {
+	box-sizing: border-box;
+}
+
+.spw-is__stage {
+	position: relative;
+	width: 100%;
+	aspect-ratio: var(--is-ar);
+	container-type: inline-size;
+}
+
+/* ---------- pictures ---------- */
+.spw-is__img {
+	position: absolute;
+	z-index: 2;
+	inset: var(--is-i1);
+	filter: drop-shadow(0 var(--is-shy) var(--is-shb) var(--is-shc));
+}
+
+.spw-is__img--2 {
+	z-index: 3;
+	inset: var(--is-i2);
+	width: var(--is-w2, auto);
+	aspect-ratio: var(--is-a2, auto);
+}
+
+.spw-is__img--3 {
+	z-index: 3;
+	inset: var(--is-i3);
+	width: var(--is-w3, auto);
+	aspect-ratio: var(--is-a3, auto);
+}
+
+.spw-is .spw-is__pic {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border: var(--is-b1, 0) solid var(--is-bc);
+	border-radius: var(--is-r1, 0);
+	clip-path: var(--is-c1, none);
+	background-clip: padding-box;
+	transition: translate var(--is-hd) ease, rotate var(--is-hd) ease;
+}
+
+.spw-is .spw-is__img--2 .spw-is__pic {
+	border: var(--is-b2, 0) solid var(--is-bc);
+	border-radius: var(--is-r2, 0);
+	clip-path: var(--is-c2, none);
+}
+
+.spw-is .spw-is__img--3 .spw-is__pic {
+	border: var(--is-b2, 0) solid var(--is-bc);
+	border-radius: var(--is-r3, 0);
+	clip-path: var(--is-c3, none);
+}
+
+.spw-is .spw-is__pic img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	object-fit: cover;
+	object-position: var(--is-op, center);
+	transition: scale var(--is-hd) ease, filter var(--is-hd) ease;
+}
+
+/* ---------- decor layers ---------- */
+.spw-is__d1,
+.spw-is__d2 {
+	position: absolute;
+	z-index: 1;
+	display: none;
+	pointer-events: none;
+}
+
+.spw-is--no-d1 .spw-is__d1,
+.spw-is--no-d2 .spw-is__d2 {
+	display: none !important;
+}
+
+/* a colour block / outline added to a single shape that does not have one */
+.spw-is.spw-is--gd1,
+.spw-is.spw-is--gd2 {
+	--is-i1: 0 var(--is-off) var(--is-off) 0;
+}
+
+.spw-is--gd1 .spw-is__d1 {
+	display: block;
+	inset: var(--is-off) 0 0 var(--is-off);
+	border-radius: var(--is-r1, 0);
+	clip-path: var(--is-c1, none);
+	background: var(--is-acc);
+}
+
+.spw-is--gd2 .spw-is__d2 {
+	display: block;
+	inset: var(--is-off) 0 0 var(--is-off);
+	border: var(--is-lw) solid var(--is-acc);
+	border-radius: var(--is-r1, 0);
+}
+
+.spw-is--gd1.spw-is--gd2 .spw-is__d2 {
+	inset: calc(var(--is-off) * 0.5);
+}
+
+/* ---------- badge, arrow button, seal, labels ---------- */
+.spw-is__badge,
+.spw-is__go,
+.spw-is__seal,
+.spw-is__chip {
+	position: absolute;
+	z-index: 6;
+}
+
+.spw-is__badge,
+.spw-is__go,
+.spw-is__seal {
+	translate: var(--is-bx, 0) var(--is-by, 0);
+}
+
+.spw-is__badge {
+	inset: auto auto 6% 0;
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2px;
+	padding: 4% 5%;
+	border-radius: var(--is-br, 14px);
+	background: var(--is-bgb, #fff);
+	color: var(--is-bgt, #1d1b26);
+	box-shadow: 0 10px 28px rgba(20, 30, 40, 0.18);
+	line-height: 1.15;
+	font-size: 14px;
+	width: var(--is-bw, auto);
+}
+
+.spw-is--hasbadge .spw-is__badge {
+	display: flex;
+}
+
+.spw-is__bt {
+	font-size: 28px;
+	font-size: clamp(16px, 8cqw, 40px);
+	font-weight: 800;
+}
+
+.spw-is__bx {
+	font-size: 13px;
+	font-size: clamp(10px, 3.3cqw, 16px);
+	opacity: 0.85;
+}
+
+.spw-is__bi {
+	display: none;
+}
+
+.spw-is__go {
+	inset: auto 0 0 auto;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 20%;
+	aspect-ratio: 1;
+	border: 4px solid #fff;
+	border-radius: 50%;
+	background: var(--is-acc);
+	color: #fff;
+	text-decoration: none;
+	transition: scale 0.25s ease;
+}
+
+.spw-is__go:hover {
+	scale: 1.08;
+}
+
+.spw-is--hasgo .spw-is__go {
+	display: flex;
+}
+
+.spw-is--hasseal .spw-is__seal {
+	display: block;
+}
+
+.spw-is--nospin .spw-is__sealring {
+	animation: none;
+}
+
+.spw-is__seal {
+	inset: -2% auto auto -2%;
+	display: none;
+	width: 24%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: #fff;
+	color: #1d1b26;
+	box-shadow: 0 8px 22px rgba(20, 30, 40, 0.18);
+}
+
+.spw-is__sealring {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	fill: currentColor;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	animation: spw-is-spin 22s linear infinite;
+}
+
+.spw-is__play {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 46%;
+	height: 46%;
+	border-radius: 50%;
+	background: var(--is-acc);
+	color: #fff;
+}
+
+.spw-is__chip {
+	display: none;
+	align-items: center;
+	gap: 8px;
+	translate: -50% -50%;
+	padding: 9px 14px;
+	border-radius: 8px;
+	background: var(--is-chipbg, #fff);
+	color: var(--is-chipc, #1d1b26);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+	box-shadow: 0 8px 22px rgba(20, 30, 40, 0.16);
+}
+
+.spw-is--haschips .spw-is__chip {
+	display: inline-flex;
+}
+
+.spw-is__chip--1 { left: 26%; top: 20%; }
+.spw-is__chip--2 { left: 66%; top: 10%; }
+.spw-is__chip--3 { left: 70%; top: 84%; }
+.spw-is__chip--4 { left: 28%; top: 70%; }
+.spw-is__chip--5 { left: 50%; top: 50%; }
+.spw-is__chip--6 { left: 50%; top: 30%; }
+.spw-is__chip--7 { left: 40%; top: 90%; }
+.spw-is__chip--8 { left: 60%; top: 60%; }
+
+.spw-is__chip.has-check::before {
+	content: "\2713";
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 5px;
+	background: var(--is-acc);
+	color: #fff;
+	font-size: 10px;
+	font-weight: 700;
+}
+
+@keyframes spw-is-spin {
+	to { rotate: 360deg; }
+}
+
+/* =====================================================================
+ * SINGLE SHAPES
+ * ===================================================================== */
+.spw-is--arch { --is-ar: 4 / 5; --is-r1: 999px 999px 0 0; }
+
+.spw-is--arch-chips { --is-ar: 4 / 5; --is-r1: 999px 999px 18px 18px; }
+
+.spw-is--capsule { --is-ar: 3 / 4; --is-i1: 0 var(--is-off) var(--is-off) 0; --is-r1: 999px; }
+.spw-is--capsule .spw-is__d1 { display: block; inset: var(--is-off) 0 0 var(--is-off); border-radius: 999px; background: var(--is-acc2); }
+.spw-is--capsule .spw-is__d2 { display: block; z-index: 3; inset: calc(var(--is-off) * 0.5); border: var(--is-lw) solid var(--is-acc); border-radius: 999px; }
+
+.spw-is--leaf { --is-r1: 50% 0 50% 0; }
+.spw-is--leaf-alt { --is-r1: 0 50% 0 50%; }
+.spw-is--drop { --is-r1: 50% 0 50% 50%; }
+.spw-is--pebble { --is-r1: 62% 38% 54% 46% / 55% 58% 42% 45%; }
+.spw-is--circle { --is-r1: 50%; }
+
+.spw-is--ring { --is-i1: calc(var(--is-off) * 0.8); --is-r1: 50%; }
+.spw-is--ring .spw-is__d2 { display: block; inset: 0; border: var(--is-lw) solid var(--is-acc); border-radius: 50%; }
+
+.spw-is--squircle { --is-r1: 26%; }
+.spw-is--pill-h { --is-ar: 5 / 3; --is-r1: 999px; }
+
+.spw-is--offset-solid { --is-i1: 0 var(--is-off) var(--is-off) 0; --is-r1: 24px; }
+.spw-is--offset-solid .spw-is__d1 { display: block; inset: var(--is-off) 0 0 var(--is-off); border-radius: 24px; background: var(--is-acc); }
+
+.spw-is--offset-corner { --is-i1: 8% 0 0 14%; --is-r1: 22px; }
+.spw-is--offset-corner .spw-is__d1 { display: block; inset: 0 22% 20% 0; border-radius: 0 44px 0 0; background: var(--is-acc); }
+
+.spw-is--offset-outline { --is-i1: 0 0 var(--is-off) var(--is-off); --is-r1: 14px; }
+.spw-is--offset-outline .spw-is__d2 { display: block; inset: var(--is-off) var(--is-off) 0 0; border: var(--is-lw) solid var(--is-acc); border-radius: 14px; }
+
+.spw-is--tilt-backdrop { --is-ar: 1 / 1.05; --is-i1: 3% 5% 5% 3%; --is-r1: 18px; }
+.spw-is--tilt-backdrop .spw-is__d1 { display: block; inset: 4% 0 0 8%; border-radius: 18px; background: var(--is-acc2); rotate: 3deg; }
+.spw-is--tilt-backdrop .spw-is__seal { display: block; top: -2%; left: -2%; }
+
+.spw-is--slash-circle { --is-r1: 50%; }
+.spw-is--slash-circle .spw-is__stage::after,
+.spw-is--slash-square .spw-is__stage::after {
+	content: "";
+	position: absolute;
+	z-index: 4;
+	pointer-events: none;
+	background: linear-gradient(to bottom right, transparent calc(50% - var(--is-sw)), var(--is-stripe) calc(50% - var(--is-sw)), var(--is-stripe) calc(50% + var(--is-sw)), transparent calc(50% + var(--is-sw)));
+}
+.spw-is--slash-circle .spw-is__stage::after { inset: 0; border-radius: 50%; }
+
+.spw-is--slash-square { --is-i1: 0 var(--is-off) var(--is-off) 0; --is-r1: 26px; }
+.spw-is--slash-square .spw-is__stage::after { inset: 0 var(--is-off) var(--is-off) 0; border-radius: 26px; }
+.spw-is--slash-square .spw-is__go { right: 0; bottom: 0; }
+
+.spw-is--hexagon { --is-ar: 0.866; --is-c1: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.spw-is--diamond { --is-c1: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.spw-is--octagon { --is-c1: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.spw-is--cut-corner { --is-c1: polygon(0 0, 84% 0, 100% 16%, 100% 100%, 16% 100%, 0 84%); }
+.spw-is--wave { --is-r1: 0 0 50% 50% / 0 0 22% 22%; }
+.spw-is--star { --is-c1: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+/* =====================================================================
+ * MULTI SHAPES
+ * ===================================================================== */
+.spw-is--inset-frame { --is-ar: 1 / 1.05; --is-i1: 0 18% 0 0; --is-r1: 22px; --is-i2: 42% 0 8% 55%; --is-r2: 18px; --is-b2: 6px; }
+.spw-is--inset-frame .spw-is__go { left: 77.5%; top: 67%; margin: -10% 0 0 -10%; }
+
+.spw-is--duo-badge { --is-ar: 5 / 4; --is-i1: 0 51% 10% 0; --is-r1: 10px; --is-i2: 10% 0 0 51%; --is-r2: 10px; --is-b2: 0px; }
+.spw-is--duo-badge .spw-is__badge { inset: 6% auto auto 3%; align-items: center; justify-content: center; width: var(--is-bw, 30%); aspect-ratio: 1; padding: 2%; border-radius: var(--is-br, 10px); background: var(--is-bgb, var(--is-acc)); color: var(--is-bgt, #fff); text-align: center; }
+
+.spw-is--card-circle { --is-ar: 1 / 1.2; --is-i1: 0 4% 12% 8%; --is-r1: 22px; --is-i2: auto 0 0 auto; --is-w2: 54%; --is-a2: 1; --is-r2: 50%; --is-b2: 7px; }
+.spw-is--card-circle .spw-is__badge { inset: 8% auto auto 0; width: var(--is-bw, 40%); gap: 2px; padding: 3% 4%; }
+.spw-is--card-circle .spw-is__badge.has-icon .spw-is__bi { display: grid; place-items: center; width: 32px; height: 32px; margin-bottom: 4px; border-radius: 50%; background: var(--is-acc); color: #fff; }
+
+.spw-is--twin-capsules { --is-ar: 1 / 1.05; --is-i1: 0 54% 8% 0; --is-r1: 999px; --is-i2: 8% 0 0 54%; --is-r2: 999px; --is-b2: 0px; }
+.spw-is--twin-capsules .spw-is__badge { inset: 0; margin: auto; align-items: center; justify-content: center; width: var(--is-bw, 36%); height: auto; aspect-ratio: 1; padding: 2%; border-radius: 50%; background: var(--is-bgb, var(--is-acc)); color: var(--is-bgt, #fff); text-align: center; border: 4px solid #fff; }
+
+.spw-is--offset-pair { --is-ar: 1 / 1.05; --is-i1: 18% 26% 4% 12%; --is-r1: 20px; --is-i2: 0 0 54% 62%; --is-r2: 20px; --is-b2: 0px; }
+.spw-is--offset-pair .spw-is__d1 { display: block; inset: 30% 50% 0 0; border-radius: 20px; background: var(--is-acc); }
+
+.spw-is--circle-duo { --is-ar: 1 / 0.95; --is-i1: 0 auto auto 0; --is-w1: 82%; --is-r1: 50%; --is-i2: auto 0 0 auto; --is-w2: 38%; --is-a2: 1; --is-r2: 50%; --is-b2: 6px; }
+.spw-is--circle-duo .spw-is__img--1 { width: 82%; aspect-ratio: 1; }
+.spw-is--circle-duo .spw-is__d2 { display: block; inset: 8% auto auto 8%; width: 82%; aspect-ratio: 1; border: var(--is-lw) solid var(--is-acc); border-radius: 50%; }
+
+.spw-is--overlap-rounded { --is-i1: 0 24% 24% 0; --is-r1: 24px; --is-i2: 24% 0 0 24%; --is-r2: 24px; --is-b2: 6px; }
+
+.spw-is--trio { --is-ar: 5 / 4; --is-i1: 0 52% 0 0; --is-r1: 100px 14px 100px 14px; --is-i2: 0 0 53% 52%; --is-r2: 14px; --is-i3: 53% 0 0 52%; --is-r3: 14px; --is-b2: 0px; }
+
+/* =====================================================================
+ * HOVER
+ * ===================================================================== */
+.spw-is--hv-zoom:hover .spw-is__pic img { scale: var(--is-hz); }
+.spw-is--hv-lift:hover .spw-is__pic { translate: 0 -10px; }
+.spw-is--hv-tilt:hover .spw-is__img--1 .spw-is__pic { rotate: -2deg; }
+.spw-is--hv-tilt:hover .spw-is__img--2 .spw-is__pic { rotate: 3deg; }
+.spw-is--hv-tilt:hover .spw-is__img--3 .spw-is__pic { rotate: -3deg; }
+.spw-is--hv-spread:hover .spw-is__img--2 .spw-is__pic { translate: 10px 10px; }
+.spw-is--hv-spread:hover .spw-is__img--3 .spw-is__pic { translate: 10px -10px; }
+.spw-is--hv-spread:hover .spw-is__img--1 .spw-is__pic { translate: -8px -6px; }
+
+.spw-is--shine .spw-is__pic::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+	translate: -120% 0;
+	pointer-events: none;
+}
+
+.spw-is--shine:hover .spw-is__pic::after {
+	translate: 120% 0;
+	transition: translate 0.9s ease;
+}
+
+/* =====================================================================
+ * FLOAT
+ * ===================================================================== */
+@keyframes spw-is-float {
+	from { transform: translateY(0); }
+	to { transform: translateY(calc(var(--is-fd) * -1)); }
+}
+
+.spw-is--float .spw-is__img--2 { animation: spw-is-float var(--is-fs) ease-in-out infinite alternate; }
+.spw-is--float .spw-is__img--3 { animation: spw-is-float var(--is-fs) ease-in-out -1.8s infinite alternate; }
+.spw-is--float .spw-is__badge { animation: spw-is-float var(--is-fs) ease-in-out -3s infinite alternate; }
+
+/* =====================================================================
+ * ENTRANCE  (hidden state has no transition, so nothing flashes)
+ * ===================================================================== */
+.spw-is.spw-js.spw-is--anim-fade-in .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-fade-up .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-zoom-in .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-blur-in .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-pop .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-slide-left .spw-is__stage,
+.spw-is.spw-js.spw-is--anim-slide-right .spw-is__stage {
+	opacity: 0;
+}
+
+.spw-is.spw-js.spw-is--anim-fade-up .spw-is__stage { translate: 0 32px; }
+.spw-is.spw-js.spw-is--anim-zoom-in .spw-is__stage { scale: 0.9; }
+.spw-is.spw-js.spw-is--anim-blur-in .spw-is__stage { filter: blur(14px); scale: 1.03; }
+.spw-is.spw-js.spw-is--anim-pop .spw-is__stage { scale: 0.75; translate: 0 16px; }
+.spw-is.spw-js.spw-is--anim-slide-left .spw-is__stage { translate: -56px 0; }
+.spw-is.spw-js.spw-is--anim-slide-right .spw-is__stage { translate: 56px 0; }
+
+.spw-is.spw-js.is-in .spw-is__stage {
+	opacity: 1;
+	translate: none;
+	scale: 1;
+	filter: none;
+	transition: opacity var(--is-ad) ease var(--is-adl), translate var(--is-ad) cubic-bezier(0.2, 0.7, 0.2, 1) var(--is-adl), scale var(--is-ad) cubic-bezier(0.2, 0.7, 0.2, 1) var(--is-adl), filter var(--is-ad) ease var(--is-adl);
+}
+
+.spw-is.spw-js.is-in.spw-is--anim-pop .spw-is__stage {
+	transition-timing-function: ease, cubic-bezier(0.3, 1.5, 0.5, 1), cubic-bezier(0.3, 1.5, 0.5, 1), ease;
+}
+
+/* the little extras pop in after the pictures */
+.spw-is.spw-js:not(.spw-is--anim-none) .spw-is__badge,
+.spw-is.spw-js:not(.spw-is--anim-none) .spw-is__go,
+.spw-is.spw-js:not(.spw-is--anim-none) .spw-is__seal,
+.spw-is.spw-js:not(.spw-is--anim-none) .spw-is__chip {
+	opacity: 0;
+	scale: 0.6;
+}
+
+.spw-is.spw-js.is-in .spw-is__badge,
+.spw-is.spw-js.is-in .spw-is__go,
+.spw-is.spw-js.is-in .spw-is__seal,
+.spw-is.spw-js.is-in .spw-is__chip {
+	opacity: 1;
+	scale: 1;
+	transition: opacity 0.5s ease calc(var(--is-adl) + 450ms), scale 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) calc(var(--is-adl) + 450ms);
+}
+
+.spw-is.spw-js.is-in .spw-is__go:hover { scale: 1.08; transition-delay: 0s; }
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-is .spw-is__stage {
+		opacity: 1 !important;
+		translate: none !important;
+		scale: 1 !important;
+		filter: none !important;
+		transition: none !important;
+	}
+	.spw-is .spw-is__badge,
+	.spw-is .spw-is__go,
+	.spw-is .spw-is__seal,
+	.spw-is .spw-is__chip {
+		opacity: 1 !important;
+		scale: 1 !important;
+		transition: none !important;
+	}
+	.spw-is .spw-is__img--2,
+	.spw-is .spw-is__img--3,
+	.spw-is .spw-is__badge,
+	.spw-is .spw-is__sealring {
+		animation: none !important;
+	}
+}
+
+/* no JavaScript: everything simply shows */
+.spw-is:not(.spw-js) .spw-is__stage { opacity: 1; }
+
+@media (max-width: 480px) {
+	.spw-is__chip { padding: 6px 10px; font-size: 11px; }
+	.spw-is__go { border-width: 3px; }
+}

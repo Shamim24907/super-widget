@@ -1,0 +1,455 @@
+/* Super Widget - Card Grid
+ * Every rule is prefixed with .spw-card-grid so theme / Elementor
+ * resets (img, a, button, h3...) do not leak in.
+ * Elementor style controls override these defaults.
+ */
+
+.spw-card-grid {
+	--spw-dur: 600ms;
+	--spw-stagger: 100ms;
+	--spw-dist: 30px;
+	--spw-hover-dur: 300ms;
+	--spw-lift: -8px;
+	--spw-zoom: 1.06;
+	--spw-title-lines: 2;
+	--spw-desc-lines: 3;
+
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 24px;
+	align-items: stretch;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.spw-card-grid *,
+.spw-card-grid *::before,
+.spw-card-grid *::after {
+	box-sizing: border-box;
+}
+
+/* ---------- Card ---------- */
+
+.spw-card-grid .spw-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	height: 100%;
+	padding: 22px;
+	background: #fff;
+	border-radius: 28px;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.12);
+	transition: transform var(--spw-hover-dur) ease, box-shadow var(--spw-hover-dur) ease;
+}
+
+.spw-card-grid.spw-hover-lift .spw-card:hover {
+	transform: translateY(var(--spw-lift));
+}
+
+/* ---------- Image ---------- */
+
+.spw-card-grid .spw-card__media {
+	position: relative;
+	overflow: hidden;
+	aspect-ratio: 322 / 305;
+	border-radius: 22px;
+	background: #e6e6e6;
+}
+
+.spw-card-grid .spw-card__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: cover;
+	transition: transform var(--spw-hover-dur) ease;
+}
+
+.spw-card-grid.spw-hover-zoom .spw-card:hover .spw-card__media img {
+	transform: scale(var(--spw-zoom));
+}
+
+/* Image link (product mode) */
+.spw-card-grid .spw-card__media-link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* ---------- Badge ---------- */
+
+.spw-card-grid .spw-card__badge {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	z-index: 2;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: var(--spw-accent, #f2790d);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: 0.02em;
+	pointer-events: none;
+}
+
+.spw-card-grid .spw-card__badge[hidden] {
+	display: none;
+}
+
+/* ---------- Wishlist heart ---------- */
+
+.spw-card-grid .spw-card__wish {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: #fff;
+	color: #2b2b2b;
+	line-height: 1;
+	cursor: pointer;
+	box-shadow: none;
+	transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.spw-card-grid .spw-card__wish:hover,
+.spw-card-grid .spw-card__wish:focus-visible {
+	background: #fff;
+	color: #2b2b2b;
+	transform: scale(1.1);
+}
+
+.spw-card-grid .spw-card__wish svg {
+	display: block;
+	width: 55%;
+	height: 55%;
+	fill: none;
+	transition: fill 0.2s ease;
+}
+
+.spw-card-grid .spw-card__wish.is-active {
+	color: #e5393b;
+}
+
+.spw-card-grid .spw-card__wish.is-active svg {
+	fill: currentColor;
+}
+
+/* ---------- Body ---------- */
+
+.spw-card-grid .spw-card__body {
+	flex: 1 1 auto;
+}
+
+.spw-card-grid .spw-card__title {
+	margin: 18px 0 10px;
+	padding: 0;
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: #2b2b2b;
+	/* Always reserve N lines and cut longer titles, so every card lines up. */
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--spw-title-lines);
+	line-clamp: var(--spw-title-lines);
+	overflow: hidden;
+	overflow-wrap: anywhere;
+	min-height: calc(var(--spw-title-lines) * 1.3em);
+	min-height: calc(var(--spw-title-lines) * 1lh);
+}
+
+.spw-card-grid .spw-card__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.spw-card-grid .spw-card__title a:hover {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.spw-card-grid .spw-card__options {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 10px;
+	/* Padding + negative margin keep focus rings from being clipped by overflow. */
+	margin: -3px -3px 7px;
+	padding: 3px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.spw-card-grid .spw-card__options::-webkit-scrollbar {
+	display: none;
+}
+
+.spw-card-grid.spw-chips-wrap .spw-card__options {
+	flex-wrap: wrap;
+	overflow: visible;
+}
+
+.spw-card-grid .spw-chip {
+	flex: 0 0 auto;
+	white-space: nowrap;
+	margin: 0;
+	padding: 2px 10px;
+	border: 1px solid #bdbdbd;
+	border-radius: 999px;
+	background: transparent;
+	color: #6b6b6b;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	text-transform: none;
+	letter-spacing: normal;
+	cursor: pointer;
+	box-shadow: none;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.spw-card-grid .spw-chip:hover {
+	background: transparent;
+	color: #2b2b2b;
+	border-color: #8a8a8a;
+}
+
+.spw-card-grid .spw-chip--ghost {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.spw-card-grid .spw-chip.is-oos {
+	opacity: 0.5;
+	text-decoration: line-through;
+}
+
+.spw-card-grid .spw-chip.is-active,
+.spw-card-grid .spw-chip.is-active:hover {
+	border-color: transparent;
+	background: #fbd9b8;
+	color: #2b2b2b;
+	font-weight: 700;
+}
+
+.spw-card-grid .spw-card__desc {
+	margin: 0 0 18px;
+	font-size: 17px;
+	line-height: 1.5;
+	color: #4a4a4a;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--spw-desc-lines);
+	line-clamp: var(--spw-desc-lines);
+	overflow: hidden;
+	min-height: calc(var(--spw-desc-lines) * 1.5em);
+	min-height: calc(var(--spw-desc-lines) * 1lh);
+}
+
+.spw-card-grid .spw-card__desc p {
+	margin: 0 0 0.6em;
+}
+
+.spw-card-grid .spw-card__desc p:last-child {
+	margin-bottom: 0;
+}
+
+/* ---------- Footer ---------- */
+
+.spw-card-grid .spw-card__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: auto;
+}
+
+.spw-card-grid .spw-card__pricing {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2px;
+	min-width: 0;
+}
+
+.spw-card-grid .spw-card__old-price {
+	font-size: 14px;
+	line-height: 1.2;
+	color: #8a8a8a;
+	text-decoration: line-through;
+	white-space: nowrap;
+}
+
+.spw-card-grid .spw-card__old-price.is-empty {
+	visibility: hidden;
+}
+
+.spw-card-grid.spw-no-old-slot .spw-card__old-price.is-empty {
+	display: none;
+}
+
+.spw-card-grid .spw-card__price {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #2b2b2b;
+	white-space: nowrap;
+}
+
+.spw-card-grid .spw-card__btn {
+	display: inline-flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	max-width: 230px;
+	margin: 0;
+	padding: 14px 24px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--spw-accent, #f2790d);
+	color: #2b2b2b;
+	font-size: 17px;
+	font-weight: 400;
+	line-height: 1.2;
+	text-decoration: none;
+	text-transform: none;
+	letter-spacing: normal;
+	cursor: pointer;
+	box-shadow: none;
+	transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.spw-card-grid .spw-card__btn:hover,
+.spw-card-grid .spw-card__btn:focus-visible {
+	background: var(--spw-accent-dark, #d96a06);
+	color: #fff;
+	text-decoration: none;
+}
+
+.spw-card-grid .spw-card__btn[disabled],
+.spw-card-grid .spw-card__btn[disabled]:hover {
+	opacity: 0.55;
+	cursor: not-allowed;
+	background: var(--spw-accent, #f2790d);
+	color: #2b2b2b;
+}
+
+.spw-card-grid .spw-card__btn.is-loading {
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.spw-card-grid .spw-card__btn:active {
+	transform: scale(0.98);
+}
+
+.spw-card-grid .spw-card__btn-icon {
+	display: inline-flex;
+	align-items: center;
+	line-height: 1;
+}
+
+.spw-card-grid .spw-card__btn-icon svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.spw-card-grid .spw-card__wish:focus-visible,
+.spw-card-grid .spw-chip:focus-visible,
+.spw-card-grid .spw-card__btn:focus-visible {
+	outline: 2px solid var(--spw-accent, #f2790d);
+	outline-offset: 2px;
+}
+
+/* ---------- Entrance animation ----------
+ * Cards are only hidden when JS is active (.spw-js), so without JS the
+ * content is always visible.
+ */
+
+.spw-card-grid.spw-js[class*="spw-anim-"] .spw-card:not(.is-visible) {
+	opacity: 0;
+}
+
+.spw-card-grid[class*="spw-anim-"] .spw-card.is-visible {
+	animation-duration: var(--spw-dur);
+	animation-delay: calc(var(--spw-i, 0) * var(--spw-stagger));
+	animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+	animation-fill-mode: backwards;
+}
+
+.spw-card-grid.spw-anim-fade-in .spw-card.is-visible    { animation-name: spw-fade-in; }
+.spw-card-grid.spw-anim-fade-up .spw-card.is-visible    { animation-name: spw-fade-up; }
+.spw-card-grid.spw-anim-fade-down .spw-card.is-visible  { animation-name: spw-fade-down; }
+.spw-card-grid.spw-anim-slide-left .spw-card.is-visible { animation-name: spw-slide-left; }
+.spw-card-grid.spw-anim-slide-right .spw-card.is-visible{ animation-name: spw-slide-right; }
+.spw-card-grid.spw-anim-zoom-in .spw-card.is-visible    { animation-name: spw-zoom-in; }
+
+@keyframes spw-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes spw-fade-up {
+	from { opacity: 0; transform: translateY(var(--spw-dist)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-fade-down {
+	from { opacity: 0; transform: translateY(calc(var(--spw-dist) * -1)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-slide-left {
+	from { opacity: 0; transform: translateX(calc(var(--spw-dist) * -1)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-slide-right {
+	from { opacity: 0; transform: translateX(var(--spw-dist)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-zoom-in {
+	from { opacity: 0; transform: scale(0.88); }
+	to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-card-grid .spw-card,
+	.spw-card-grid .spw-card__media img,
+	.spw-card-grid .spw-card__btn,
+	.spw-card-grid .spw-card__wish {
+		transition: none;
+	}
+
+	.spw-card-grid[class*="spw-anim-"] .spw-card.is-visible {
+		animation: none;
+	}
+
+	.spw-card-grid.spw-js[class*="spw-anim-"] .spw-card:not(.is-visible) {
+		opacity: 1;
+	}
+}

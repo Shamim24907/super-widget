@@ -1,0 +1,795 @@
+/* Super Widget - Testimonial 2 (one testimonial at a time)
+ * Every rule is prefixed with .spw-tc so theme / Elementor resets do not leak in.
+ * Elementor style controls override these defaults.
+ *
+ * All slides sit in ONE grid cell: the stage is as tall as the tallest slide,
+ * every slide fills it, so photo / text / name / role never jump around.
+ */
+
+.spw-tc {
+	--tc-accent: #ee1d5c;
+	--tc-ring: var(--tc-accent);
+	--tc-circle: var(--tc-accent);
+	--tc-track: var(--tc-accent);
+	--tc-dot: rgba(255, 255, 255, 0.6);
+	--tc-thumb: #fff;
+
+	--spw-ph: 180px;
+	--spw-photo-col: 45%;
+	--spw-col-1: minmax(0, var(--spw-photo-col));
+	--spw-col-2: minmax(0, 1fr);
+	--spw-side-order: 0;
+	--spw-col-gap: 40px;
+	--spw-row-gap: 24px;
+	--spw-v: 1;
+	--spw-cgap: 30px;
+	--spw-slot: var(--spw-shift);
+	--spw-lines: 6;
+	--spw-dur: 800ms;
+	--spw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--spw-shift: 80px;
+	--spw-inset: 90px;
+	--spw-arrow-x: 0px;
+	--spw-thumb: 18px;
+	--spw-step: 24px;
+	--spw-qo-x: -48px;
+	--spw-qo-y: -44px;
+	--spw-qc-x: 0px;
+	--spw-qc-y: 40px;
+	--spw-star: 16px;
+	--spw-star-space: 0px;
+	--spw-star-on: #f4a51c;
+	--spw-star-off: #d8d8de;
+	--spw-m-left: 0 auto;
+	--spw-m-center: auto;
+	--spw-m-right: auto 0;
+
+	--spw-lines-narrow: 9;
+	--spw-nav-gap: 28px;
+	--spw-nav-between: 16px;
+	--spw-arrow-gap: 12px;
+	--ad-side: flex;
+	--ad-top: none;
+	--ad-bot: none;
+	--ad-fb: flex;
+	--ad-self: center;
+	--ad-v: center;
+	--ad-inset: var(--spw-inset);
+	--dd-top: none;
+	--dd-bot: flex;
+	--dd-self: center;
+
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 40px 40px 44px;
+	background: #fff;
+	overflow-x: clip;
+}
+
+.spw-tc--photo-right {
+	--spw-col-1: minmax(0, 1fr);
+	--spw-col-2: minmax(0, var(--spw-photo-col));
+	--spw-side-order: 2;
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+	.spw-tc {
+		--tc-circle: color-mix(in srgb, var(--tc-accent) 90%, #fff);
+	}
+}
+
+.spw-tc *,
+.spw-tc *::before,
+.spw-tc *::after {
+	box-sizing: border-box;
+}
+
+/* ---------- Heading ---------- */
+
+.spw-tc .spw-tc__head {
+	margin: 0 0 40px;
+	text-align: center;
+}
+
+.spw-tc .spw-tc__line {
+	display: block;
+	width: 50px;
+	height: 4px;
+	margin: 0 auto 14px;
+	background: #f39200;
+}
+
+.spw-tc .spw-tc__title {
+	margin: 0;
+	padding: 0;
+	font-size: 38px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #0d0d12;
+}
+
+.spw-tc .spw-tc__sub {
+	margin: 10px 0 0;
+	font-size: 20px;
+	line-height: 1.4;
+	color: #1b1b22;
+}
+
+/* ---------- Stage ---------- */
+
+.spw-tc .spw-tc__stage {
+	position: relative;
+}
+
+/* The viewport hides slides that are off stage. It is wider than the slides by
+ * 56px each side, so the ring / circles around a photo and the quote marks are
+ * never cut at the slide edge. */
+.spw-tc .spw-tc__viewport {
+	overflow: hidden;
+	margin: -30px calc(var(--ad-inset, 0px) - 56px);
+	padding: 30px 56px;
+}
+
+.spw-tc .spw-tc__track {
+	display: grid;
+	touch-action: pan-y;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.spw-tc.spw-tc--swipe .spw-tc__track {
+	cursor: grab;
+}
+
+.spw-tc .spw-tc__track.is-dragging {
+	cursor: grabbing;
+}
+
+/* ---------- Slide ---------- */
+
+.spw-tc .spw-tc__slide {
+	grid-area: 1 / 1;
+	display: flex;
+	justify-self: center;
+	width: calc((100% - (var(--spw-v) - 1) * var(--spw-cgap)) / var(--spw-v));
+	min-width: 0;
+	margin: 0;
+
+	transform: translateX(calc(var(--d, 0) * var(--spw-slot) + var(--spw-drag, 0px))) scale(var(--sc, 1));
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	will-change: transform, opacity;
+	transition:
+		transform var(--spw-dur) var(--spw-ease),
+		opacity calc(var(--spw-dur) * 0.45) ease,
+		visibility 0s linear var(--spw-dur);
+}
+
+.spw-tc .spw-tc__slide.is-active {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	z-index: 1;
+	transition:
+		transform var(--spw-dur) var(--spw-ease),
+		opacity calc(var(--spw-dur) * 0.7) ease calc(var(--spw-dur) * 0.12),
+		visibility 0s;
+}
+
+.spw-tc.spw-tc--fade .spw-tc__slide {
+	transform: translateX(var(--spw-drag, 0px));
+}
+
+/* Several testimonials at once: every slide has its own slot, so the
+ * slot offset always applies, whatever the transition. */
+.spw-tc.spw-tc--multi {
+	--spw-slot: calc(100% + var(--spw-cgap));
+}
+
+.spw-tc.spw-tc--multi .spw-tc__slide,
+.spw-tc.spw-tc--multi.spw-tc--fade .spw-tc__slide,
+.spw-tc.spw-tc--multi.spw-tc--zoom .spw-tc__slide {
+	--sc: 1;
+	transform: translateX(calc(var(--d, 0) * var(--spw-slot) + var(--spw-drag, 0px)));
+}
+
+.spw-tc.spw-tc--zoom .spw-tc__slide {
+	transform: translateX(var(--spw-drag, 0px)) scale(var(--sc, 1));
+}
+
+.spw-tc.spw-tc--zoom .spw-tc__slide:not(.is-active) {
+	--sc: 0.9;
+}
+
+/* A slide that wraps round the back must not fly across the stage. */
+.spw-tc .spw-tc__slide.is-jump {
+	transition: none;
+}
+
+.spw-tc.spw-tc--init .spw-tc__slide,
+.spw-tc.spw-tc--init .spw-tc__media,
+.spw-tc.spw-tc--init .spw-tc__q,
+.spw-tc.spw-tc--init .spw-tc__text,
+.spw-tc.spw-tc--init .spw-tc__name,
+.spw-tc.spw-tc--init .spw-tc__role,
+.spw-tc.spw-tc--init .spw-tc__stars,
+.spw-tc .spw-tc__track.is-dragging .spw-tc__slide {
+	transition: none;
+}
+
+/* Photo + text grid inside every slide. */
+.spw-tc .spw-tc__inner {
+	display: grid;
+	flex: 1 1 auto;
+	grid-template-columns: var(--spw-col-1) var(--spw-col-2);
+	align-items: center;
+	gap: var(--spw-row-gap) var(--spw-col-gap);
+	width: 100%;
+	min-width: 0;
+}
+
+/* ---------- Photo ---------- */
+
+.spw-tc .spw-tc__media {
+	position: relative;
+	order: var(--spw-media-order, 0);
+	width: var(--spw-ph);
+	height: var(--spw-ph);
+	margin-inline: auto;
+}
+
+.spw-tc .spw-tc__photo {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border: 3px solid #fff;
+	border-radius: 50%;
+	background: #e6e6ea;
+}
+
+.spw-tc .spw-tc__photo img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: cover;
+}
+
+.spw-tc .spw-tc__letter {
+	color: #55556a;
+	font-size: calc(var(--spw-ph) * 0.38);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.spw-tc.spw-tc--deco .spw-tc__media::before,
+.spw-tc.spw-tc--deco .spw-tc__media::after {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+	box-shadow: 0 12px 26px rgba(17, 17, 34, 0.18);
+}
+
+/* Big circle peeking out at the top left. */
+.spw-tc.spw-tc--deco .spw-tc__media::before {
+	z-index: 0;
+	width: calc(var(--spw-ph) * 0.72);
+	height: calc(var(--spw-ph) * 0.72);
+	left: calc(var(--spw-ph) * -0.14);
+	top: calc(var(--spw-ph) * -0.16);
+	background: var(--tc-circle);
+}
+
+/* Ring around the photo. */
+.spw-tc.spw-tc--deco .spw-tc__media::after {
+	z-index: 1;
+	inset: calc(var(--spw-ph) * -0.1);
+	background: var(--tc-ring);
+}
+
+/* ---------- Text ---------- */
+
+.spw-tc .spw-tc__content {
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	min-width: 0;
+	text-align: left;
+}
+
+/* The review fills the free height, so name and role stay at the bottom of
+ * every slide and all slides line up without reserving extra lines. */
+.spw-tc .spw-tc__qbox {
+	position: relative;
+	flex: 1 1 auto;
+}
+
+.spw-tc .spw-tc__text {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.8;
+	color: #555;
+}
+
+/* "Reserve a fixed number of lines" mode. */
+.spw-tc.spw-tc--lines .spw-tc__text {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--spw-lines);
+	line-clamp: var(--spw-lines);
+	overflow: hidden;
+	min-height: calc(var(--spw-lines) * 1.8em);
+	min-height: calc(var(--spw-lines) * 1lh);
+}
+
+.spw-tc .spw-tc__q {
+	position: absolute;
+	display: block;
+	font-size: 40px;
+	line-height: 1;
+	color: #d4d4d8;
+	pointer-events: none;
+}
+
+.spw-tc .spw-tc__q i,
+.spw-tc .spw-tc__q svg {
+	display: block;
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.spw-tc .spw-tc__q--open {
+	left: var(--spw-qo-x);
+	top: var(--spw-qo-y);
+}
+
+.spw-tc .spw-tc__q--close {
+	right: calc(var(--spw-qc-x) * -1);
+	bottom: calc(var(--spw-qc-y) * -1);
+}
+
+.spw-tc .spw-tc__name {
+	margin: 26px 0 0;
+	font-size: 34px;
+	font-weight: 700;
+	line-height: 1.15;
+	color: #777;
+	overflow-wrap: anywhere;
+}
+
+.spw-tc .spw-tc__role {
+	margin: 6px 0 0;
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--tc-accent);
+}
+
+.spw-tc .spw-tc__stars {
+	--sz: var(--spw-star);
+	--gap: var(--spw-star-space);
+	display: inline-block;
+	vertical-align: top;
+	width: calc((var(--sz) * 28 / 24 + var(--gap)) * 5);
+	height: var(--sz);
+	margin: 0;
+	background: linear-gradient(90deg, var(--spw-star-on) calc(var(--r, 5) * 20%), var(--spw-star-off) 0);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 0 28 24'%3E%3Cpath d='M12 1.5l3.1 6.3 6.9 1-5 4.9 1.2 6.9-6.2-3.3-6.2 3.3 1.2-6.9-5-4.9 6.9-1z' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / calc(var(--sz) * 28 / 24 + var(--gap)) 100% repeat-x;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 0 28 24'%3E%3Cpath d='M12 1.5l3.1 6.3 6.9 1-5 4.9 1.2 6.9-6.2-3.3-6.2 3.3 1.2-6.9-5-4.9 6.9-1z' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / calc(var(--sz) * 28 / 24 + var(--gap)) 100% repeat-x;
+}
+
+/* Block wrapper: it follows the text alignment (or its own alignment control),
+ * the inline-block stars inside are aligned by it. */
+.spw-tc .spw-tc__rate {
+	margin: 12px 0 0;
+	line-height: 0;
+}
+
+/* ---------- Compact: narrow slides (2-3 columns, small sections) ----------
+ * Driven by the width of the slide itself (class set by the script), not the
+ * screen, so it also works when the widget sits in a narrow column. */
+.spw-tc.is-slide-narrow .spw-tc__inner {
+	grid-template-columns: minmax(0, 1fr) !important;
+	grid-template-rows: auto 1fr !important;
+}
+
+.spw-tc.is-slide-narrow .spw-tc__media {
+	order: 0 !important;
+}
+
+.spw-tc.is-slide-narrow .spw-tc__content {
+	text-align: center !important;
+}
+
+.spw-tc.is-slide-narrow .spw-tc__qbox {
+	--spw-qo-x: 0px;
+	--spw-qo-y: -32px;
+	--spw-qc-x: 0px;
+	--spw-qc-y: 30px;
+}
+
+.spw-tc.spw-tc--lines.is-slide-narrow .spw-tc__text {
+	-webkit-line-clamp: var(--spw-lines-narrow);
+	line-clamp: var(--spw-lines-narrow);
+	min-height: calc(var(--spw-lines-narrow) * 1.8em);
+	min-height: calc(var(--spw-lines-narrow) * 1lh);
+}
+
+
+/* ---------- Content reveal ---------- */
+
+.spw-tc.spw-tc--reveal .spw-tc__media {
+	opacity: 0;
+	transform: scale(0.82);
+	transition: opacity 0.6s ease, transform var(--spw-dur) var(--spw-ease);
+}
+
+.spw-tc.spw-tc--reveal .spw-tc__q,
+.spw-tc.spw-tc--reveal .spw-tc__text,
+.spw-tc.spw-tc--reveal .spw-tc__name,
+.spw-tc.spw-tc--reveal .spw-tc__role,
+.spw-tc.spw-tc--reveal .spw-tc__stars {
+	opacity: 0;
+	transform: translateY(16px);
+	transition: opacity 0.6s ease, transform 0.8s var(--spw-ease);
+}
+
+.spw-tc.spw-tc--reveal .is-active .spw-tc__media {
+	opacity: 1;
+	transform: none;
+	transition-delay: 0.12s;
+}
+
+.spw-tc.spw-tc--reveal .is-active .spw-tc__q,
+.spw-tc.spw-tc--reveal .is-active .spw-tc__text,
+.spw-tc.spw-tc--reveal .is-active .spw-tc__name,
+.spw-tc.spw-tc--reveal .is-active .spw-tc__role,
+.spw-tc.spw-tc--reveal .is-active .spw-tc__stars {
+	opacity: 1;
+	transform: none;
+}
+
+.spw-tc.spw-tc--reveal .is-active .spw-tc__q--open  { transition-delay: 0.2s; }
+.spw-tc.spw-tc--reveal .is-active .spw-tc__text     { transition-delay: 0.26s; }
+.spw-tc.spw-tc--reveal .is-active .spw-tc__q--close { transition-delay: 0.34s; }
+.spw-tc.spw-tc--reveal .is-active .spw-tc__name     { transition-delay: 0.4s; }
+.spw-tc.spw-tc--reveal .is-active .spw-tc__role     { transition-delay: 0.48s; }
+.spw-tc.spw-tc--reveal .is-active .spw-tc__stars    { transition-delay: 0.54s; }
+
+/* ---------- Navigation placement ----------
+ * Where the arrows and the pill sit is chosen in Elementor (per device). The
+ * choice arrives as CSS variables, see includes/class-nav.php. */
+
+.spw-tc .spw-tc__zone {
+	display: flex;
+	flex-direction: column;
+}
+
+.spw-tc .spw-tc__zone--bottom > * {
+	margin-top: var(--spw-nav-gap);
+}
+
+.spw-tc .spw-tc__zone--top > * {
+	margin-bottom: var(--spw-nav-between);
+}
+
+.spw-tc .spw-tc__zone--top > :last-child {
+	margin-bottom: var(--spw-nav-gap);
+}
+
+.spw-tc .spw-tc__zone--bottom > * + * {
+	margin-top: var(--spw-nav-between);
+}
+
+.spw-tc .spw-tc__arrows {
+	align-items: center;
+	gap: var(--spw-arrow-gap);
+}
+
+/* Arrows at the sides of the slider (over its left and right edge). */
+.spw-tc .spw-tc__arrows--side {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	display: var(--ad-side);
+	align-items: var(--ad-v);
+	justify-content: space-between;
+	padding-inline: var(--spw-arrow-x);
+	pointer-events: none;
+}
+
+.spw-tc .spw-tc__arrows--side .spw-tc__arrow {
+	pointer-events: auto;
+}
+
+.spw-tc .spw-tc__arrows--top {
+	display: var(--ad-top);
+	align-self: var(--ad-self);
+}
+
+.spw-tc .spw-tc__arrows--bottom {
+	display: var(--ad-bot);
+	align-self: var(--ad-self);
+}
+
+/* Shown instead of the side arrows when the widget gets narrow. */
+.spw-tc .spw-tc__arrows--fb {
+	display: none;
+	align-self: center;
+}
+
+.spw-tc .spw-tc__arrow {
+	z-index: 3;
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 60px;
+	height: 60px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+	box-shadow: 0 6px 14px rgba(17, 17, 34, 0.16);
+	transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.spw-tc .spw-tc__arrow i,
+.spw-tc .spw-tc__arrow svg {
+	display: block;
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.spw-tc .spw-tc__arrow svg.spw-tc__svg-line {
+	fill: none;
+}
+
+.spw-tc .spw-tc__arrow--prev {
+	background: #e6e6e6;
+	color: #fff;
+}
+
+.spw-tc .spw-tc__arrow--next {
+	background: var(--tc-accent);
+	color: #fff;
+}
+
+/* Both arrows react to hover in the same way, so a color chosen for the
+ * arrows never makes one of them behave differently from the other. */
+.spw-tc .spw-tc__arrow:hover:not(:disabled),
+.spw-tc .spw-tc__arrow:focus-visible {
+	background: var(--tc-accent);
+	color: #fff;
+	filter: brightness(1.08);
+}
+
+.spw-tc .spw-tc__arrow:active:not(:disabled) {
+	transform: scale(0.94);
+}
+
+.spw-tc .spw-tc__arrow:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.spw-tc .spw-tc__arrow:focus-visible,
+.spw-tc .spw-tc__dot:focus-visible {
+	outline: 2px solid var(--tc-accent);
+	outline-offset: 3px;
+}
+
+/* ---------- Pill indicator ---------- */
+
+.spw-tc .spw-tc__dots {
+	position: relative;
+	align-items: center;
+	width: fit-content;
+	height: calc(var(--spw-thumb) + 8px);
+	padding: 0 4px;
+	border-radius: 999px;
+	background: var(--tc-track);
+	box-shadow: 0 5px 12px rgba(17, 17, 34, 0.14);
+}
+
+.spw-tc .spw-tc__dot {
+	position: relative;
+	z-index: 1;
+	flex: none;
+	width: var(--spw-step);
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	line-height: 0;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.spw-tc .spw-tc__dot::before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 6px;
+	height: 6px;
+	margin: -3px 0 0 -3px;
+	border-radius: 50%;
+	background: var(--tc-dot);
+}
+
+.spw-tc .spw-tc__dots--top {
+	display: var(--dd-top);
+	align-self: var(--dd-self);
+}
+
+.spw-tc .spw-tc__dots--bottom {
+	display: var(--dd-bot);
+	align-self: var(--dd-self);
+}
+
+/* The big white marker slides to the active dot. */
+.spw-tc .spw-tc__thumb {
+	position: absolute;
+	z-index: 2;
+	left: calc(4px + (var(--spw-step) - var(--spw-thumb)) / 2);
+	top: 50%;
+	width: var(--spw-thumb);
+	height: var(--spw-thumb);
+	margin-top: calc(var(--spw-thumb) / -2);
+	border-radius: 50%;
+	background: var(--tc-thumb);
+	box-shadow: 0 2px 6px rgba(17, 17, 34, 0.25);
+	pointer-events: none;
+	transform: translateX(calc(var(--i, 0) * var(--spw-step)));
+	transition: transform calc(var(--spw-dur) * 0.7) var(--spw-ease);
+}
+
+.spw-tc.spw-tc--init .spw-tc__thumb {
+	transition: none;
+}
+
+/* ---------- Entrance animation ---------- */
+
+.spw-tc.spw-js[class*="spw-tc-anim-"]:not(.is-visible) {
+	opacity: 0;
+}
+
+.spw-tc[class*="spw-tc-anim-"].is-visible {
+	animation-duration: 0.8s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	animation-fill-mode: backwards;
+}
+
+.spw-tc.spw-tc-anim-fade-in.is-visible { animation-name: spw-tc-fade-in; }
+.spw-tc.spw-tc-anim-fade-up.is-visible { animation-name: spw-tc-fade-up; }
+.spw-tc.spw-tc-anim-zoom-in.is-visible { animation-name: spw-tc-zoom-in; }
+
+@keyframes spw-tc-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes spw-tc-fade-up {
+	from { opacity: 0; transform: translateY(30px); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-tc-zoom-in {
+	from { opacity: 0; transform: scale(0.94); }
+	to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1024px) {
+	.spw-tc {
+		padding: 34px 28px 38px;
+	}
+
+	.spw-tc .spw-tc__title {
+		font-size: 32px;
+	}
+
+	.spw-tc .spw-tc__name {
+		font-size: 28px;
+	}
+
+	.spw-tc .spw-tc__role {
+		font-size: 18px;
+	}
+}
+
+@media (max-width: 767px) {
+	.spw-tc {
+		--spw-qo-x: 0px;
+		--spw-qo-y: -36px;
+		--spw-qc-y: 32px;
+		padding: 28px 18px 32px;
+	}
+
+	.spw-tc .spw-tc__head {
+		margin-bottom: 28px;
+	}
+
+	.spw-tc .spw-tc__title {
+		font-size: 26px;
+	}
+
+	.spw-tc .spw-tc__sub {
+		font-size: 16px;
+	}
+
+	.spw-tc .spw-tc__name {
+		margin-top: 20px;
+		font-size: 24px;
+	}
+
+	.spw-tc .spw-tc__role {
+		font-size: 16px;
+	}
+
+	.spw-tc .spw-tc__text {
+		font-size: 15px;
+	}
+}
+
+/* Narrow widget (small section or small screen): side arrows would cover the
+ * content, so the fallback pair under the slider takes over. */
+.spw-tc.is-narrow .spw-tc__stage {
+	--ad-inset: 0px;
+}
+
+.spw-tc.is-narrow .spw-tc__arrows--side {
+	display: none;
+}
+
+.spw-tc.is-narrow .spw-tc__arrows--fb {
+	display: var(--ad-fb, none);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-tc .spw-tc__slide,
+	.spw-tc .spw-tc__media,
+	.spw-tc .spw-tc__q,
+	.spw-tc .spw-tc__text,
+	.spw-tc .spw-tc__name,
+	.spw-tc .spw-tc__role,
+	.spw-tc .spw-tc__stars,
+	.spw-tc .spw-tc__thumb,
+	.spw-tc .spw-tc__arrow {
+		transition: none;
+	}
+
+	.spw-tc[class*="spw-tc-anim-"].is-visible {
+		animation: none;
+	}
+
+	.spw-tc.spw-js[class*="spw-tc-anim-"]:not(.is-visible) {
+		opacity: 1;
+	}
+}

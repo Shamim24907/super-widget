@@ -1,0 +1,425 @@
+/* Super Widget - Collection Grid
+ * Collage (7 styles) / normal grid / slider of colored category cards.
+ * Everything is prefixed .spw-cg. Sizes and colors are CSS variables set by Elementor.
+ */
+
+.spw-cg {
+	--cg-cols: 4;
+	--cg-gap: 12px;
+	--cg-row: 150px;
+	--cg-h: 260px;
+	--cg-bg: #d9bfa5;
+	--cg-angle: 135deg;
+	--cg-fg: #fff;
+	--cg-pad: 0px;
+	--cg-off: 16px;
+	--cg-dur: 700ms;
+	--cg-stagger: 70ms;
+	--cg-hov: 400ms;
+	--cg-zoom: 1.07;
+	--cg-lift: -4px;
+	--cg-scrim: 0;
+	--cg-btn: 42px;
+	--cg-dot: rgba(0, 0, 0, 0.2);
+	--cg-dot-on: var(--spw-accent, #7c5cd6);
+	position: relative;
+	box-sizing: border-box;
+}
+
+.spw-cg *,
+.spw-cg *::before,
+.spw-cg *::after {
+	box-sizing: border-box;
+}
+
+.spw-cg__track {
+	display: grid;
+	gap: var(--cg-gap);
+	margin: 0;
+	padding: 0;
+}
+
+.spw-cg__slide {
+	min-width: 0;
+	display: flex;
+}
+
+/* ---- card ---- */
+.spw-cg .spw-cg__card {
+	position: relative;
+	display: block;
+	flex: 1 1 auto;
+	width: 100%;
+	min-height: 0;
+	overflow: hidden;
+	isolation: isolate;
+	background: linear-gradient(var(--cg-angle), var(--cg-bg), var(--cg-bg2, var(--cg-bg)));
+	border-radius: 4px;
+	color: var(--cg-fg);
+	text-decoration: none;
+	transition: translate var(--cg-hov) ease, box-shadow var(--cg-hov) ease;
+}
+
+.spw-cg .spw-cg__card:focus-visible {
+	outline: 2px solid var(--cg-dot-on);
+	outline-offset: 2px;
+}
+
+.spw-cg .spw-cg__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	padding: var(--cg-pad);
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: contain;
+	object-position: center bottom;
+	transform-origin: center bottom;
+	scale: calc(var(--cg-scale, 1) * var(--cg-flip, 1)) var(--cg-scale, 1);
+	translate: var(--cg-x, 0) var(--cg-y, 0);
+	rotate: var(--cg-rot, 0deg);
+	transition: transform calc(var(--cg-hov) + 100ms) cubic-bezier(0.2, 0.7, 0.2, 1), filter var(--cg-hov) ease;
+	z-index: 0;
+}
+
+/* dark fade behind the label (off by default) */
+.spw-cg .spw-cg__card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, var(--cg-scrim)), rgba(0, 0, 0, 0) 55%);
+	opacity: 1;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.spw-cg .spw-cg__card--bl::before,
+.spw-cg .spw-cg__card--br::before,
+.spw-cg .spw-cg__card--bc::before {
+	background: linear-gradient(to top, rgba(0, 0, 0, var(--cg-scrim)), rgba(0, 0, 0, 0) 55%);
+}
+
+/* hover tint */
+.spw-cg .spw-cg__card::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: transparent;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease;
+	z-index: 1;
+}
+
+.spw-cg .spw-cg__card:hover::after,
+.spw-cg .spw-cg__card:focus-visible::after {
+	opacity: 1;
+}
+
+/* ---- label (title + small text) ---- */
+.spw-cg .spw-cg__label {
+	position: absolute;
+	z-index: 3;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-width: calc(100% - 2 * var(--cg-off));
+	pointer-events: none;
+}
+
+.spw-cg .spw-cg__title {
+	margin: 0;
+	padding: 0;
+	color: var(--cg-fg);
+	font-size: 15px;
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: 0.01em;
+	transition: color 0.25s ease;
+}
+
+.spw-cg .spw-cg__sub {
+	display: block;
+	color: var(--cg-fg);
+	font-size: 12px;
+	line-height: 1.3;
+	opacity: 0.85;
+}
+
+.spw-cg__card--tl .spw-cg__label { top: var(--cg-off); left: var(--cg-off); }
+.spw-cg__card--tr .spw-cg__label { top: var(--cg-off); right: var(--cg-off); text-align: right; align-items: flex-end; }
+.spw-cg__card--bl .spw-cg__label { bottom: var(--cg-off); left: var(--cg-off); }
+.spw-cg__card--br .spw-cg__label { bottom: var(--cg-off); right: var(--cg-off); text-align: right; align-items: flex-end; }
+.spw-cg__card--tc .spw-cg__label { top: var(--cg-off); left: 50%; translate: -50% 0; text-align: center; align-items: center; }
+.spw-cg__card--bc .spw-cg__label { bottom: var(--cg-off); left: 50%; translate: -50% 0; text-align: center; align-items: center; }
+
+/* ---- badge: sits in the corner opposite the label ---- */
+.spw-cg .spw-cg__badge {
+	position: absolute;
+	z-index: 3;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: #fff;
+	color: #1d1b26;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	pointer-events: none;
+}
+
+.spw-cg__card--tl .spw-cg__badge,
+.spw-cg__card--tc .spw-cg__badge { top: var(--cg-off); right: var(--cg-off); }
+.spw-cg__card--tr .spw-cg__badge { top: var(--cg-off); left: var(--cg-off); }
+.spw-cg__card--bl .spw-cg__badge,
+.spw-cg__card--bc .spw-cg__badge { bottom: var(--cg-off); right: var(--cg-off); }
+.spw-cg__card--br .spw-cg__badge { bottom: var(--cg-off); left: var(--cg-off); }
+
+/* ---- hover ---- */
+.spw-cg--hover-lift .spw-cg__card:hover,
+.spw-cg--hover-lift .spw-cg__card:focus-visible {
+	translate: 0 var(--cg-lift);
+	box-shadow: 0 14px 28px rgba(20, 20, 30, 0.18);
+}
+
+.spw-cg--hover-zoom .spw-cg__card:hover .spw-cg__img,
+.spw-cg--hover-zoom .spw-cg__card:focus-visible .spw-cg__img {
+	transform: scale(var(--cg-zoom));
+}
+
+/* shine sweep (only rendered when switched on) */
+.spw-cg .spw-cg__shine {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+	background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.38) 50%, transparent 62%);
+	translate: -120% 0;
+	transition: translate 0.8s ease;
+}
+
+.spw-cg .spw-cg__card:hover .spw-cg__shine,
+.spw-cg .spw-cg__card:focus-visible .spw-cg__shine {
+	translate: 120% 0;
+}
+
+/* ---- Collage: 12 columns. Each style repeats every 4 or 5 cards. ---- */
+.spw-cg--collage .spw-cg__track {
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	grid-auto-rows: var(--cg-row);
+}
+
+.spw-cg--cs-classic .spw-cg__slide:nth-child(5n + 1) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 2); }
+.spw-cg--cs-classic .spw-cg__slide:nth-child(5n + 2) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-classic .spw-cg__slide:nth-child(5n + 3) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-classic .spw-cg__slide:nth-child(5n + 4) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+.spw-cg--cs-classic .spw-cg__slide:nth-child(5n) { grid-column: span var(--cs, 5); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-mirror .spw-cg__slide:nth-child(5n + 1) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-mirror .spw-cg__slide:nth-child(5n + 2) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-mirror .spw-cg__slide:nth-child(5n + 3) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 2); }
+.spw-cg--cs-mirror .spw-cg__slide:nth-child(5n + 4) { grid-column: span var(--cs, 5); grid-row: span var(--rs, 1); }
+.spw-cg--cs-mirror .spw-cg__slide:nth-child(5n) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-sides .spw-cg__slide:nth-child(5n + 1) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 2); }
+.spw-cg--cs-sides .spw-cg__slide:nth-child(5n + 2) { grid-column: span var(--cs, 6); grid-row: span var(--rs, 1); }
+.spw-cg--cs-sides .spw-cg__slide:nth-child(5n + 3) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 2); }
+.spw-cg--cs-sides .spw-cg__slide:nth-child(5n + 4) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+.spw-cg--cs-sides .spw-cg__slide:nth-child(5n) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-half .spw-cg__slide:nth-child(5n + 1) { grid-column: span var(--cs, 6); grid-row: span var(--rs, 2); }
+.spw-cg--cs-half .spw-cg__slide:nth-child(5n + 2) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+.spw-cg--cs-half .spw-cg__slide:nth-child(5n + 3) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+.spw-cg--cs-half .spw-cg__slide:nth-child(5n + 4) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+.spw-cg--cs-half .spw-cg__slide:nth-child(5n) { grid-column: span var(--cs, 3); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-banner .spw-cg__slide:nth-child(4n + 1) { grid-column: span var(--cs, 12); grid-row: span var(--rs, 1); }
+.spw-cg--cs-banner .spw-cg__slide:nth-child(4n + 2) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-banner .spw-cg__slide:nth-child(4n + 3) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-banner .spw-cg__slide:nth-child(4n) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-stair .spw-cg__slide:nth-child(4n + 1) { grid-column: span var(--cs, 8); grid-row: span var(--rs, 1); }
+.spw-cg--cs-stair .spw-cg__slide:nth-child(4n + 2) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-stair .spw-cg__slide:nth-child(4n + 3) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-stair .spw-cg__slide:nth-child(4n) { grid-column: span var(--cs, 8); grid-row: span var(--rs, 1); }
+
+.spw-cg--cs-magazine .spw-cg__slide:nth-child(5n + 1) { grid-column: span var(--cs, 6); grid-row: span var(--rs, 1); }
+.spw-cg--cs-magazine .spw-cg__slide:nth-child(5n + 2) { grid-column: span var(--cs, 6); grid-row: span var(--rs, 1); }
+.spw-cg--cs-magazine .spw-cg__slide:nth-child(5n + 3) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-magazine .spw-cg__slide:nth-child(5n + 4) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+.spw-cg--cs-magazine .spw-cg__slide:nth-child(5n) { grid-column: span var(--cs, 4); grid-row: span var(--rs, 1); }
+
+/* Phones: two columns. A card can be made full width with "Full width on mobile". */
+@media (max-width: 767px) {
+	.spw-cg.spw-cg--collage .spw-cg__track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.spw-cg.spw-cg--collage .spw-cg__slide:nth-child(n) { grid-column: span 1; grid-row: span 1; }
+	.spw-cg.spw-cg--collage .spw-cg__slide.is-m-full { grid-column: span 2; }
+}
+
+/* ---- Normal grid ---- */
+.spw-cg--grid .spw-cg__track {
+	grid-template-columns: repeat(var(--cg-cols), minmax(0, 1fr));
+	grid-auto-rows: var(--cg-h);
+}
+
+.spw-cg--grid .spw-cg__slide {
+	grid-column: span min(var(--cs, 1), var(--cg-cols));
+	grid-row: span var(--rs, 1);
+}
+
+.spw-cg--slider .spw-cg__slide {
+	height: var(--cg-h);
+}
+
+/* ---- Slider ---- */
+.spw-cg__stage {
+	position: relative;
+}
+
+.spw-cg__viewport {
+	min-width: 0;
+}
+
+.spw-cg--slider .spw-cg__viewport {
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior-x: contain;
+	padding: 10px 0;
+	margin: -10px 0;
+}
+
+.spw-cg--slider .spw-cg__viewport:focus-visible {
+	outline: 2px solid var(--cg-dot-on);
+	outline-offset: -2px;
+	border-radius: 6px;
+}
+
+.spw-cg--slider .spw-cg__viewport::-webkit-scrollbar {
+	display: none;
+}
+
+.spw-cg--slider .spw-cg__track {
+	display: flex;
+	width: 100%;
+}
+
+.spw-cg--slider .spw-cg__slide {
+	flex: 0 0 calc((100% - (var(--cg-cols) - 1) * var(--cg-gap)) / var(--cg-cols));
+	scroll-snap-align: start;
+}
+
+.spw-cg .spw-cg__btn {
+	position: absolute;
+	top: 50%;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--cg-btn);
+	height: var(--cg-btn);
+	margin: calc(var(--cg-btn) / -2) 0 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: #fff;
+	color: #1d1b26;
+	box-shadow: 0 6px 18px rgba(20, 20, 30, 0.2);
+	cursor: pointer;
+	transition: background-color 0.2s ease, opacity 0.2s ease, scale 0.2s ease;
+}
+
+.spw-cg .spw-cg__btn:hover,
+.spw-cg .spw-cg__btn:focus-visible {
+	background: #f1eefb;
+	scale: 1.06;
+}
+
+.spw-cg .spw-cg__btn:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+.spw-cg .spw-cg__btn[hidden] { display: none; }
+.spw-cg__btn--prev { left: 8px; }
+.spw-cg__btn--next { right: 8px; }
+
+.spw-cg__dots {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 16px;
+}
+
+.spw-cg__dots:empty { display: none; }
+
+.spw-cg__dot {
+	width: 9px;
+	height: 9px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: var(--cg-dot);
+	cursor: pointer;
+	transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.spw-cg__dot.is-on {
+	width: 26px;
+	background: var(--cg-dot-on);
+}
+
+/* ---- entrance (only when JS runs, so no-JS visitors still see everything).
+ * Hiding is instant; the transition only exists once the grid is in view, so nothing flashes. ---- */
+.spw-cg.spw-js.spw-cg--anim-fade-in .spw-cg__slide,
+.spw-cg.spw-js.spw-cg--anim-fade-up .spw-cg__slide,
+.spw-cg.spw-js.spw-cg--anim-zoom-in .spw-cg__slide,
+.spw-cg.spw-js.spw-cg--anim-blur-in .spw-cg__slide,
+.spw-cg.spw-js.spw-cg--anim-pop .spw-cg__slide {
+	opacity: 0;
+}
+
+.spw-cg.spw-js.spw-cg--anim-fade-up .spw-cg__slide { translate: 0 22px; }
+.spw-cg.spw-js.spw-cg--anim-zoom-in .spw-cg__slide { scale: 0.92; }
+.spw-cg.spw-js.spw-cg--anim-blur-in .spw-cg__slide { filter: blur(14px); scale: 1.04; }
+.spw-cg.spw-js.spw-cg--anim-pop .spw-cg__slide { scale: 0.7; translate: 0 14px; }
+
+.spw-cg.spw-js.is-in .spw-cg__slide {
+	opacity: 1;
+	translate: 0 0;
+	scale: 1;
+	filter: none;
+	transition: opacity calc(var(--cg-dur) * 0.85) ease, translate var(--cg-dur) cubic-bezier(0.2, 0.7, 0.2, 1), scale var(--cg-dur) cubic-bezier(0.2, 0.7, 0.2, 1), filter var(--cg-dur) ease;
+	transition-delay: min(calc(var(--i, 0) * var(--cg-stagger)), 800ms);
+}
+
+.spw-cg.spw-js.is-in.spw-cg--anim-pop .spw-cg__slide {
+	transition-timing-function: ease, cubic-bezier(0.34, 1.56, 0.64, 1), cubic-bezier(0.34, 1.56, 0.64, 1), ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-cg *,
+	.spw-cg *::before,
+	.spw-cg *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+
+	.spw-cg.spw-js .spw-cg__slide {
+		opacity: 1 !important;
+		translate: none !important;
+		scale: 1 !important;
+		filter: none !important;
+	}
+
+	.spw-cg .spw-cg__shine { display: none; }
+	.spw-cg__viewport { scroll-behavior: auto !important; }
+}

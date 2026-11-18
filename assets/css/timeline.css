@@ -1,0 +1,940 @@
+/* Super Widget - Timeline
+ * Vertical (line in the middle or at the edge) and horizontal timelines.
+ * Everything is prefixed with .spw-tl so theme / Elementor resets do not leak in.
+ * Layout is driven by CSS variables, which Elementor sets per device.
+ */
+
+.spw-tl {
+	--tl-line: #2a2233;
+	--tl-accent: var(--spw-accent, #7c5cd6);
+	--tl-accent-2: #e86bb8;
+	--tl-lift: -6px;
+	--tl-dim: 0.55;
+	--tl-marker-c: var(--tl-line);
+	--tl-icon: #fff;
+	--tl-line-w: 3px;
+	--tl-marker: 18px;
+	--tl-tick: 22px;
+	--tl-marker-y: 22px;
+	--tl-axis: 64px;
+	--tl-axis-h: 44px;
+	--tl-space: 44px;
+	--tl-hgap: 28px;
+	--tl-hcols: 3;
+	--tl-inner: 16px;
+	--tl-dur: 700ms;
+
+	/* vertical layout (alternate); Elementor overrides these per device */
+	--tl-cols: minmax(0, 1fr) var(--tl-axis) minmax(0, 1fr);
+	--ax-col: 2;
+	--m-row: 1;
+	--i-row: 1;
+	--o-main: 3;
+	--o-media: 1;
+	--e-main: 1;
+	--e-media: 3;
+	--o-ta: left;
+	--e-ta: right;
+	--o-hd: row;
+	--e-hd: row-reverse;
+	--o-ai: flex-start;
+	--e-ai: flex-end;
+	--o-dir: 1;
+	--e-dir: -1;
+
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.spw-tl *,
+.spw-tl *::before,
+.spw-tl *::after {
+	box-sizing: border-box;
+}
+
+.spw-tl .spw-tl__track {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.spw-tl .spw-tl__item {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	min-width: 0;
+}
+
+.spw-tl .spw-tl__item.is-odd {
+	--m-col: var(--o-main);
+	--i-col: var(--o-media);
+	--ta: var(--o-ta);
+	--ai: var(--o-ai);
+	--hd: var(--o-hd);
+	--dir: var(--o-dir);
+}
+
+.spw-tl .spw-tl__item.is-even {
+	--m-col: var(--e-main);
+	--i-col: var(--e-media);
+	--ta: var(--e-ta);
+	--ai: var(--e-ai);
+	--hd: var(--e-hd);
+	--dir: var(--e-dir);
+}
+
+/* ---------- Text ---------- */
+
+.spw-tl .spw-tl__main {
+	min-width: 0;
+	text-align: var(--ta, left);
+}
+
+.spw-tl .spw-tl__head {
+	display: flex;
+	flex-direction: var(--hd, row);
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: var(--hj, flex-start);
+	gap: 4px 14px;
+	margin: 0 0 10px;
+}
+
+.spw-tl.spw-tl--head-stacked .spw-tl__head {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: var(--ai, flex-start);
+	row-gap: 8px;
+}
+
+.spw-tl .spw-tl__year {
+	color: #1d1630;
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.spw-tl .spw-tl__title {
+	margin: 0;
+	padding: 0;
+	color: #5a3fa8;
+	font-family: "Segoe Script", "Snell Roundhand", "Brush Script MT", "Lucida Handwriting", cursive;
+	font-size: 28px;
+	font-style: italic;
+	font-weight: 400;
+	line-height: 1.2;
+}
+
+.spw-tl .spw-tl__title a {
+	color: inherit;
+	font: inherit;
+	text-decoration: none;
+	transition: color 0.25s ease;
+}
+
+.spw-tl .spw-tl__desc {
+	margin: 0;
+	color: #5f5a6b;
+	font-size: 15px;
+	line-height: 1.65;
+}
+
+/* ---------- Picture ---------- */
+
+.spw-tl .spw-tl__media {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	min-width: 0;
+}
+
+.spw-tl .spw-tl__frame {
+	width: 170px;
+	max-width: 100%;
+	aspect-ratio: 1 / 1;
+	overflow: hidden;
+	margin: 0;
+	background: #ece8f5;
+}
+
+.spw-tl .spw-tl__frame img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: cover;
+	/* individual transform properties: zoom, parallax and the entrance never fight */
+	scale: var(--zs, 1);
+	translate: 0 var(--py, 0px);
+	transition: scale 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.spw-tl.spw-tl--parallax .spw-tl__frame img { --zs: 1.14; }
+.spw-tl.spw-tl--hover-zoom .spw-tl__frame:hover img { --zs: 1.1; }
+.spw-tl.spw-tl--parallax.spw-tl--hover-zoom .spw-tl__frame:hover img { --zs: 1.26; }
+
+.spw-tl .spw-tl__main {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.spw-tl.spw-tl--hover-lift .spw-tl__main:hover {
+	transform: translateY(var(--tl-lift));
+}
+
+/* ---------- Line + markers (shared) ---------- */
+
+.spw-tl .spw-tl__axis {
+	position: relative;
+}
+
+.spw-tl .spw-tl__axis::before,
+.spw-tl .spw-tl__axis::after {
+	content: "";
+	position: absolute;
+	background: var(--tl-line);
+}
+
+.spw-tl .spw-tl__axis::before,
+.spw-tl .spw-tl__axis::after {
+	border-radius: 99px;
+}
+
+.spw-tl .spw-tl__axis::after {
+	background: var(--tl-accent);
+	box-shadow: 0 0 12px color-mix(in srgb, var(--tl-accent) 55%, transparent);
+}
+
+.spw-tl:not(.spw-tl--progress) .spw-tl__axis::after {
+	display: none;
+}
+
+.spw-tl .spw-tl__marker {
+	position: absolute;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--tl-marker-c);
+	color: var(--tl-icon);
+	line-height: 1;
+	transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+.spw-tl.spw-tl--progress .spw-tl__item.is-reached .spw-tl__marker {
+	background: var(--tl-accent);
+}
+
+.spw-tl .spw-tl__marker svg,
+.spw-tl .spw-tl__marker i {
+	width: 0.55em;
+	height: 0.55em;
+	font-size: inherit;
+	fill: currentColor;
+}
+
+/* ================= Vertical ================= */
+
+.spw-tl.spw-tl--vertical .spw-tl__item {
+	display: grid;
+	grid-template-columns: var(--tl-cols);
+	grid-template-rows: auto auto;
+	column-gap: 0;
+	row-gap: 0;
+	padding-block: calc(var(--tl-space) / 2);
+}
+
+.spw-tl.spw-tl--vertical .spw-tl__item.is-first { padding-top: 0; }
+.spw-tl.spw-tl--vertical .spw-tl__item.is-last  { padding-bottom: 0; }
+
+.spw-tl.spw-tl--vertical .spw-tl__main {
+	grid-column: var(--m-col);
+	grid-row: var(--m-row);
+}
+
+.spw-tl.spw-tl--vertical .spw-tl__media {
+	grid-column: var(--i-col);
+	grid-row: var(--i-row);
+	margin-bottom: var(--tl-mb, 0px);
+}
+
+/* The axis cell spans the whole step, so the line is continuous. */
+.spw-tl.spw-tl--vertical .spw-tl__axis {
+	grid-column: var(--ax-col);
+	grid-row: 1 / span 2;
+	/* the first step has no padding on top, so its line starts at the marker */
+	--lt: 0px;
+	--lb: 0px;
+	--my: var(--tl-marker-y);
+}
+
+/* The axis of a later step reaches up into the padding, so the line never breaks. */
+.spw-tl.spw-tl--vertical .spw-tl__item:not(.is-first) .spw-tl__axis { margin-top: calc(var(--tl-space) / -2); --my: calc(var(--tl-marker-y) + var(--tl-space) / 2); }
+.spw-tl.spw-tl--vertical .spw-tl__item:not(.is-last) .spw-tl__axis { margin-bottom: calc(var(--tl-space) / -2); }
+
+.spw-tl.spw-tl--vertical .spw-tl__axis::before,
+.spw-tl.spw-tl--vertical .spw-tl__axis::after {
+	left: 50%;
+	width: var(--tl-line-w);
+	transform: translateX(-50%);
+	top: var(--lt);
+}
+
+.spw-tl.spw-tl--vertical .spw-tl__axis::before {
+	bottom: var(--lb);
+}
+
+.spw-tl.spw-tl--vertical .spw-tl__axis::after {
+	height: calc((100% - var(--lt) - var(--lb)) * var(--fill, 0));
+}
+
+.spw-tl.spw-tl--vertical .spw-tl__item.is-first .spw-tl__axis { --lt: var(--my); }
+.spw-tl.spw-tl--vertical .spw-tl__item.is-last .spw-tl__axis  { --lb: calc(100% - var(--my)); }
+
+/* Markers (vertical) */
+.spw-tl.spw-tl--vertical .spw-tl__marker {
+	top: var(--my);
+}
+
+.spw-tl.spw-tl--vertical.spw-tl--m-dot .spw-tl__marker,
+.spw-tl.spw-tl--vertical.spw-tl--m-ring .spw-tl__marker,
+.spw-tl.spw-tl--vertical.spw-tl--m-icon .spw-tl__marker {
+	left: 50%;
+	width: var(--tl-marker);
+	height: var(--tl-marker);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.spw-tl.spw-tl--m-ring .spw-tl__marker {
+	background: #fff;
+	border: var(--tl-line-w) solid var(--tl-marker-c);
+}
+
+.spw-tl.spw-tl--m-ring.spw-tl--progress .spw-tl__item.is-reached .spw-tl__marker {
+	background: #fff;
+	border-color: var(--tl-accent);
+}
+
+.spw-tl.spw-tl--m-icon .spw-tl__marker {
+	font-size: var(--tl-marker);
+}
+
+.spw-tl.spw-tl--m-icon .spw-tl__marker svg,
+.spw-tl.spw-tl--m-icon .spw-tl__marker i {
+	width: 0.6em;
+	height: 0.6em;
+}
+
+/* Tick: a short bar from the line toward the text */
+.spw-tl.spw-tl--vertical.spw-tl--m-tick .spw-tl__marker {
+	left: calc(50% - (1 - var(--dir, 1)) * var(--tl-tick) / 2);
+	width: var(--tl-tick);
+	height: var(--tl-line-w);
+	transform: translateY(-50%);
+}
+
+/* ================= Horizontal ================= */
+
+.spw-tl.spw-tl--horizontal .spw-tl__track {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: calc((100% - (var(--tl-hcols) - 1) * var(--tl-hgap)) / var(--tl-hcols));
+	column-gap: var(--tl-hgap);
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x proximity;
+	scrollbar-width: thin;
+	padding-bottom: 4px;
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__item {
+	display: grid;
+	grid-template-rows: 1fr var(--tl-axis-h) 1fr;
+	row-gap: 0;
+	scroll-snap-align: start;
+	--dir: 1;
+}
+
+/* Subgrid: every step shares the same three rows, so all markers sit on one straight line
+ * even when the texts above and below have different heights. */
+@supports (grid-template-rows: subgrid) {
+	.spw-tl.spw-tl--horizontal .spw-tl__track {
+		grid-template-rows: 1fr var(--tl-axis-h) 1fr;
+	}
+
+	.spw-tl.spw-tl--horizontal .spw-tl__item {
+		grid-row: 1 / span 3;
+		grid-template-rows: subgrid;
+	}
+
+	.spw-tl.spw-tl--no-media.spw-tl--h-below .spw-tl__track { grid-template-rows: 0 var(--tl-axis-h) auto; }
+	.spw-tl.spw-tl--no-media.spw-tl--h-above .spw-tl__track { grid-template-rows: auto var(--tl-axis-h) 0; }
+}
+
+/* Text on one side of the line, picture on the other. */
+/* text below the line (--m-row 3) or above it (--m-row 1); the picture takes the other side */
+.spw-tl.spw-tl--h-alternate .spw-tl__item.is-odd,
+.spw-tl.spw-tl--h-below .spw-tl__item {
+	--m-row: 3; --i-row: 1; --m-self: start; --i-self: end; --vdir: 1;
+	--m-mt: var(--tl-inner); --m-mb: 0px; --i-mt: 0px; --i-mb: var(--tl-inner);
+}
+
+.spw-tl.spw-tl--h-alternate .spw-tl__item.is-even,
+.spw-tl.spw-tl--h-above .spw-tl__item {
+	--m-row: 1; --i-row: 3; --m-self: end; --i-self: start; --vdir: -1;
+	--m-mt: 0px; --m-mb: var(--tl-inner); --i-mt: var(--tl-inner); --i-mb: 0px;
+}
+
+/* No pictures at all: do not keep an empty half. */
+.spw-tl.spw-tl--no-media.spw-tl--h-below .spw-tl__item { grid-template-rows: 0 var(--tl-axis-h) auto; }
+.spw-tl.spw-tl--no-media.spw-tl--h-above .spw-tl__item { grid-template-rows: auto var(--tl-axis-h) 0; }
+
+.spw-tl.spw-tl--horizontal .spw-tl__main {
+	grid-column: 1;
+	grid-row: var(--m-row);
+	align-self: var(--m-self);
+	--ta: center;
+	--hj: center;
+	--hd: row;
+	margin-top: var(--m-mt);
+	margin-bottom: var(--m-mb);
+	padding-inline: calc(var(--tl-hgap) / 4);
+	max-width: none;
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__media {
+	grid-column: 1;
+	grid-row: var(--i-row);
+	align-self: var(--i-self);
+	margin-top: var(--i-mt);
+	margin-bottom: var(--i-mb);
+	padding-inline: calc(var(--tl-hgap) / 4);
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__axis {
+	grid-column: 1;
+	grid-row: 2;
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__axis::before,
+.spw-tl.spw-tl--horizontal .spw-tl__axis::after {
+	top: 50%;
+	height: var(--tl-line-w);
+	transform: translateY(-50%);
+	/* reach into the gap so neighbouring steps join up */
+	left: calc(var(--tl-hgap) / -2);
+	right: calc(var(--tl-hgap) / -2);
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-first .spw-tl__axis::before,
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-first .spw-tl__axis::after { left: 50%; }
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-last .spw-tl__axis::before,
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-last .spw-tl__axis::after  { right: 50%; }
+
+.spw-tl.spw-tl--horizontal .spw-tl__axis::after {
+	right: auto;
+	width: 0;
+	transition: width 0.6s ease;
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-reached .spw-tl__axis::after {
+	width: calc(100% + var(--tl-hgap));
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-first.is-reached .spw-tl__axis::after,
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-last.is-reached .spw-tl__axis::after {
+	width: calc(50% + var(--tl-hgap) / 2);
+}
+
+.spw-tl.spw-tl--horizontal .spw-tl__item.is-first.is-last .spw-tl__axis::after { width: 0; }
+
+.spw-tl.spw-tl--horizontal .spw-tl__marker {
+	top: 50%;
+	left: 50%;
+}
+
+.spw-tl.spw-tl--horizontal.spw-tl--m-dot .spw-tl__marker,
+.spw-tl.spw-tl--horizontal.spw-tl--m-ring .spw-tl__marker,
+.spw-tl.spw-tl--horizontal.spw-tl--m-icon .spw-tl__marker {
+	width: var(--tl-marker);
+	height: var(--tl-marker);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* Tick: a short vertical bar from the line toward the text */
+.spw-tl.spw-tl--horizontal.spw-tl--m-tick .spw-tl__marker {
+	width: var(--tl-line-w);
+	height: var(--tl-tick);
+	top: calc(50% - (1 - var(--vdir, 1)) * var(--tl-tick) / 2);
+	transform: translateX(-50%);
+}
+
+/* ---------- Arrows ---------- */
+
+.spw-tl .spw-tl__nav {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 18px;
+}
+
+.spw-tl .spw-tl__nav[hidden] {
+	display: none;
+}
+
+.spw-tl .spw-tl__nav-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 1px solid var(--tl-line);
+	border-radius: 50%;
+	box-shadow: none;
+	color: var(--tl-line);
+	cursor: pointer;
+	transition: background-color 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+}
+
+.spw-tl .spw-tl__nav-btn:hover,
+.spw-tl .spw-tl__nav-btn:focus-visible {
+	background: var(--tl-line);
+	color: #fff;
+}
+
+.spw-tl .spw-tl__nav-btn:focus-visible {
+	outline: 2px solid var(--tl-accent);
+	outline-offset: 2px;
+}
+
+.spw-tl .spw-tl__nav-btn[disabled] {
+	opacity: 0.35;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* ---------- Entrance animation ----------
+ * Steps are only hidden when JS is active (.spw-js), so without JS
+ * everything stays visible.
+ */
+
+.spw-tl.spw-js[class*="spw-tl--anim-"] .spw-tl__item:not(.is-visible) .spw-tl__main,
+.spw-tl.spw-js[class*="spw-tl--anim-"] .spw-tl__item:not(.is-visible) .spw-tl__media {
+	opacity: 0;
+}
+
+.spw-tl[class*="spw-tl--anim-"] .spw-tl__item.is-visible .spw-tl__main,
+.spw-tl[class*="spw-tl--anim-"] .spw-tl__item.is-visible .spw-tl__media {
+	animation-duration: var(--tl-dur);
+	animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+	animation-fill-mode: backwards;
+}
+
+.spw-tl[class*="spw-tl--anim-"] .spw-tl__item.is-visible .spw-tl__media {
+	animation-delay: 140ms;
+}
+
+.spw-tl.spw-tl--anim-fade-in .is-visible .spw-tl__main,
+.spw-tl.spw-tl--anim-fade-in .is-visible .spw-tl__media { animation-name: spw-tl-fade-in; }
+.spw-tl.spw-tl--anim-fade-up .is-visible .spw-tl__main,
+.spw-tl.spw-tl--anim-fade-up .is-visible .spw-tl__media { animation-name: spw-tl-fade-up; }
+.spw-tl.spw-tl--anim-zoom-in .is-visible .spw-tl__main,
+.spw-tl.spw-tl--anim-zoom-in .is-visible .spw-tl__media { animation-name: spw-tl-zoom-in; }
+.spw-tl.spw-tl--anim-slide .is-visible .spw-tl__main  { animation-name: spw-tl-slide; --sx: calc(var(--dir, 1) * 40px); }
+.spw-tl.spw-tl--anim-slide .is-visible .spw-tl__media { animation-name: spw-tl-slide; --sx: calc(var(--dir, 1) * -40px); }
+
+@keyframes spw-tl-fade-in {
+	from { opacity: 0; }
+	to   { opacity: var(--tl-op, 1); }
+}
+
+@keyframes spw-tl-fade-up {
+	from { opacity: 0; transform: translateY(28px); }
+	to   { opacity: var(--tl-op, 1); transform: none; }
+}
+
+@keyframes spw-tl-zoom-in {
+	from { opacity: 0; transform: scale(0.9); }
+	to   { opacity: var(--tl-op, 1); transform: none; }
+}
+
+@keyframes spw-tl-slide {
+	from { opacity: 0; transform: translateX(var(--sx, 40px)); }
+	to   { opacity: var(--tl-op, 1); transform: none; }
+}
+
+/* =====================================================================
+ * Premium layer: designs, markers, spotlight, reveal
+ * ===================================================================== */
+
+/* ---------- Designs ---------- */
+
+.spw-tl.spw-tl--d-cards,
+.spw-tl.spw-tl--d-glass {
+	--tl-line: #ddd7f1;
+	--tl-marker-c: #cbc3e8;
+}
+
+.spw-tl.spw-tl--d-classic .spw-tl__frame {
+	border: 3px solid #1d1630;
+}
+
+/* the little extras live in .spw-tl__fx: ghost year + hover bar. Only the premium designs show it. */
+.spw-tl .spw-tl__fx {
+	display: none;
+}
+
+.spw-tl.spw-tl--d-cards .spw-tl__main,
+.spw-tl.spw-tl--d-glass .spw-tl__main {
+	position: relative;
+	padding: 26px 28px 30px;
+	border: 1px solid rgba(124, 92, 214, 0.14);
+	border-radius: 22px;
+	transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.45s ease, border-color 0.35s ease, background-color 0.35s ease, opacity 0.5s ease, scale 0.5s ease;
+}
+
+.spw-tl.spw-tl--d-cards .spw-tl__main {
+	background: #fff;
+	box-shadow: 0 18px 44px -18px rgba(44, 26, 100, 0.22), 0 2px 8px rgba(44, 26, 100, 0.05);
+}
+
+.spw-tl.spw-tl--d-glass .spw-tl__main {
+	background: rgba(255, 255, 255, 0.5);
+	border-color: rgba(255, 255, 255, 0.7);
+	box-shadow: 0 18px 44px -18px rgba(30, 20, 80, 0.3);
+	-webkit-backdrop-filter: blur(16px) saturate(150%);
+	backdrop-filter: blur(16px) saturate(150%);
+}
+
+.spw-tl.spw-tl--d-cards .spw-tl__fx,
+.spw-tl.spw-tl--d-glass .spw-tl__fx {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	display: block;
+	overflow: hidden;
+	border-radius: inherit;
+	pointer-events: none;
+}
+
+.spw-tl .spw-tl__main > :not(.spw-tl__fx) {
+	position: relative;
+	z-index: 1;
+}
+
+.spw-tl .spw-tl__ghost {
+	position: absolute;
+	top: -8px;
+	right: 16px;
+	color: var(--tl-accent);
+	font-size: 92px;
+	font-weight: 800;
+	letter-spacing: -0.05em;
+	line-height: 1;
+	opacity: 0.06;
+	white-space: nowrap;
+	user-select: none;
+	transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* gradient bar that draws itself along the bottom on hover */
+.spw-tl .spw-tl__fx::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 4px;
+	background: linear-gradient(90deg, var(--tl-accent), var(--tl-accent-2));
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.spw-tl.spw-tl--hover-lift .spw-tl__main:hover .spw-tl__fx::after,
+.spw-tl.spw-tl--hover-lift .spw-tl__item.is-current .spw-tl__fx::after {
+	transform: scaleX(1);
+}
+
+.spw-tl.spw-tl--hover-lift .spw-tl__main:hover .spw-tl__ghost {
+	opacity: 0.11;
+	transform: translateY(4px) scale(1.04);
+}
+
+.spw-tl.spw-tl--d-cards.spw-tl--hover-lift .spw-tl__main:hover,
+.spw-tl.spw-tl--d-glass.spw-tl--hover-lift .spw-tl__main:hover {
+	border-color: color-mix(in srgb, var(--tl-accent) 40%, transparent);
+	box-shadow: 0 30px 60px -22px color-mix(in srgb, var(--tl-accent) 45%, rgba(20, 10, 60, 0.4)), 0 4px 14px rgba(44, 26, 100, 0.08);
+}
+
+/* connector from the card to the marker (vertical, round markers) */
+.spw-tl.spw-tl--vertical:not(.spw-tl--m-tick).spw-tl--d-cards .spw-tl__main::before,
+.spw-tl.spw-tl--vertical:not(.spw-tl--m-tick).spw-tl--d-glass .spw-tl__main::before {
+	--cw: calc(var(--tl-axis) / 2 - var(--tl-marker) / 2);
+	content: "";
+	position: absolute;
+	top: var(--tl-marker-y);
+	left: calc((1 - var(--dir, 1)) / 2 * 100% - (1 + var(--dir, 1)) / 2 * var(--cw));
+	width: var(--cw);
+	height: var(--tl-line-w);
+	background: var(--tl-line);
+	border-radius: 99px;
+	transform: translateY(-50%);
+	transition: background-color 0.4s ease;
+}
+
+.spw-tl.spw-tl--progress .spw-tl__item.is-reached .spw-tl__main::before {
+	background: var(--tl-accent);
+}
+
+/* In the premium designs the text always reads from the left edge. */
+.spw-tl.spw-tl--d-cards .spw-tl__item,
+.spw-tl.spw-tl--d-glass .spw-tl__item {
+	--ta: left;
+	--ai: flex-start;
+	--hd: row;
+}
+
+/* ---------- Year + title ---------- */
+
+.spw-tl.spw-tl--year-pill .spw-tl__year {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.5em 1.1em;
+	border-radius: 999px;
+	background: linear-gradient(135deg, var(--tl-accent), var(--tl-accent-2));
+	box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--tl-accent) 80%, transparent);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.spw-tl.spw-tl--d-cards .spw-tl__title,
+.spw-tl.spw-tl--d-glass .spw-tl__title {
+	color: #1b1535;
+	font-family: inherit;
+	font-size: 22px;
+	font-style: normal;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+}
+
+.spw-tl.spw-tl--d-cards .spw-tl__desc,
+.spw-tl.spw-tl--d-glass .spw-tl__desc {
+	color: #625d73;
+	font-size: 15px;
+}
+
+.spw-tl.spw-tl--hover-lift .spw-tl__item:hover .spw-tl__title,
+.spw-tl.spw-tl--hover-lift .spw-tl__item:hover .spw-tl__title a {
+	color: var(--tl-accent);
+}
+
+.spw-tl .spw-tl__title,
+.spw-tl .spw-tl__year {
+	transition: color 0.35s ease, background-color 0.35s ease;
+}
+
+/* ---------- Picture ---------- */
+
+.spw-tl.spw-tl--d-cards .spw-tl__frame,
+.spw-tl.spw-tl--d-glass .spw-tl__frame {
+	border-radius: 20px;
+	box-shadow: 0 22px 44px -18px rgba(44, 26, 100, 0.42);
+}
+
+/* ---------- Markers ---------- */
+
+.spw-tl.spw-tl--m-dot .spw-tl__marker,
+.spw-tl.spw-tl--m-ring .spw-tl__marker {
+	background: #fff;
+	border: 3px solid var(--tl-marker-c);
+}
+
+.spw-tl.spw-tl--m-icon .spw-tl__marker {
+	width: calc(var(--tl-marker) * 1.9);
+	height: calc(var(--tl-marker) * 1.9);
+	font-size: calc(var(--tl-marker) * 1.05);
+}
+
+/* without the progress effect a marker is simply filled */
+.spw-tl:not(.spw-tl--progress).spw-tl--m-dot .spw-tl__marker {
+	background: var(--tl-marker-c);
+}
+
+/* reached: gradient, soft halo, a little pop */
+.spw-tl.spw-tl--progress.spw-tl--m-dot .spw-tl__item.is-reached .spw-tl__marker,
+.spw-tl.spw-tl--progress.spw-tl--m-icon .spw-tl__item.is-reached .spw-tl__marker {
+	background: linear-gradient(135deg, var(--tl-accent), var(--tl-accent-2));
+	border-color: transparent;
+	box-shadow: 0 0 0 5px color-mix(in srgb, var(--tl-accent) 16%, transparent), 0 8px 18px -6px color-mix(in srgb, var(--tl-accent) 70%, transparent);
+}
+
+.spw-tl.spw-tl--progress.spw-tl--m-ring .spw-tl__item.is-reached .spw-tl__marker {
+	border-color: var(--tl-accent);
+	box-shadow: 0 0 0 5px color-mix(in srgb, var(--tl-accent) 16%, transparent);
+}
+
+.spw-tl.spw-tl--progress.spw-tl--m-tick .spw-tl__item.is-reached .spw-tl__marker {
+	box-shadow: 0 0 10px color-mix(in srgb, var(--tl-accent) 60%, transparent);
+}
+
+.spw-tl.spw-tl--m-dot .spw-tl__marker,
+.spw-tl.spw-tl--m-ring .spw-tl__marker,
+.spw-tl.spw-tl--m-icon .spw-tl__marker {
+	transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.45s ease, scale 0.35s ease;
+}
+
+.spw-tl[class*="spw-tl--hover-"] .spw-tl__item:hover .spw-tl__marker {
+	scale: 1.2;
+}
+
+.spw-tl.spw-tl--progress .spw-tl__item.is-reached .spw-tl__marker {
+	animation: spw-tl-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* the marker of the step in view keeps pulsing */
+.spw-tl.spw-tl--pulse:not(.spw-tl--m-tick) .spw-tl__item.is-current .spw-tl__marker::after {
+	content: "";
+	position: absolute;
+	inset: -3px;
+	border: 2px solid var(--tl-accent);
+	border-radius: 50%;
+	opacity: 0;
+	animation: spw-tl-pulse 2.2s ease-out infinite;
+}
+
+@keyframes spw-tl-pop {
+	0%   { scale: 0.4; }
+	60%  { scale: 1.35; }
+	100% { scale: 1; }
+}
+
+@keyframes spw-tl-pulse {
+	0%   { transform: scale(1); opacity: 0.7; }
+	100% { transform: scale(2.3); opacity: 0; }
+}
+
+/* ---------- Spotlight: the step in view stands out ---------- */
+
+.spw-tl .spw-tl__main,
+.spw-tl .spw-tl__media {
+	opacity: var(--tl-op, 1);
+}
+
+/* The dim level is a variable that the entrance animation ends on, so nothing jumps afterwards. */
+.spw-tl.spw-js.spw-tl--focus .spw-tl__item.is-visible:not(.is-current):not(:hover) {
+	--tl-op: var(--tl-dim);
+}
+
+.spw-tl.spw-js.spw-tl--focus .spw-tl__item.is-visible:not(.is-current):not(:hover) .spw-tl__main {
+	scale: 0.975;
+}
+
+/* Shrink toward the line, so the connector stays joined to the marker. */
+.spw-tl.spw-tl--vertical .spw-tl__main {
+	transform-origin: calc((1 - var(--dir, 1)) / 2 * 100%) var(--tl-marker-y);
+}
+
+.spw-tl.spw-js.spw-tl--focus .spw-tl__media {
+	transition: opacity 0.5s ease;
+}
+
+/* horizontal cards: centred pill */
+.spw-tl.spw-tl--horizontal .spw-tl__main {
+	--ai: center;
+}
+
+.spw-tl.spw-js.spw-tl--focus .spw-tl__main {
+	transition: opacity 0.5s ease, scale 0.5s ease, transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.45s ease, border-color 0.35s ease, background-color 0.35s ease;
+}
+
+/* ---------- Premium reveal ---------- */
+
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__main { animation-name: spw-tl-reveal; }
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__media { animation: none; }
+
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__year,
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__title,
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__desc {
+	animation: spw-tl-rise 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__year  { animation-delay: 0.15s; }
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__title { animation-delay: 0.25s; }
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__desc  { animation-delay: 0.35s; }
+
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__frame {
+	animation: spw-tl-wipe 1s 0.2s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+.spw-tl.spw-tl--anim-reveal .is-visible .spw-tl__frame img {
+	animation: spw-tl-imgin 1.3s 0.2s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+@keyframes spw-tl-reveal {
+	from { opacity: 0; transform: translateY(48px) scale(0.95); filter: blur(10px); }
+	to   { opacity: var(--tl-op, 1); transform: none; filter: blur(0); }
+}
+
+@keyframes spw-tl-rise {
+	from { opacity: 0; transform: translateY(16px); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-tl-wipe {
+	from { clip-path: inset(0 0 100% 0); }
+	to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes spw-tl-imgin {
+	from { transform: scale(1.3); }
+	to   { transform: none; }
+}
+
+/* ---------- Accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-tl .spw-tl__main,
+	.spw-tl .spw-tl__frame img,
+	.spw-tl .spw-tl__marker,
+	.spw-tl .spw-tl__fx::after,
+	.spw-tl .spw-tl__ghost,
+	.spw-tl .spw-tl__axis::after {
+		transition: none;
+	}
+
+	.spw-tl .spw-tl__marker,
+	.spw-tl .spw-tl__marker::after,
+	.spw-tl .is-visible .spw-tl__year,
+	.spw-tl .is-visible .spw-tl__title,
+	.spw-tl .is-visible .spw-tl__desc,
+	.spw-tl .is-visible .spw-tl__frame,
+	.spw-tl .is-visible .spw-tl__frame img {
+		animation: none !important;
+	}
+
+	.spw-tl[class*="spw-tl--anim-"] .spw-tl__item.is-visible .spw-tl__main,
+	.spw-tl[class*="spw-tl--anim-"] .spw-tl__item.is-visible .spw-tl__media {
+		animation: none;
+	}
+
+	.spw-tl.spw-js[class*="spw-tl--anim-"] .spw-tl__item:not(.is-visible) .spw-tl__main,
+	.spw-tl.spw-js[class*="spw-tl--anim-"] .spw-tl__item:not(.is-visible) .spw-tl__media {
+		opacity: 1;
+	}
+}

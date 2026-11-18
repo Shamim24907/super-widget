@@ -1,0 +1,152 @@
+/* Super Widget - Image Mosaic
+ * One image shown through several tiles. Every tile holds the same picture,
+ * moved so that it shows "its" part of the whole. Everything is prefixed with
+ * .spw-im so theme / Elementor resets do not leak in.
+ */
+
+.spw-im {
+	--im-gx: 8px;
+	--im-gy: var(--im-gx);
+	--im-radius: 22px;
+	--im-fx: 50%;
+	--im-fy: 50%;
+	--im-dur: 700ms;
+	--im-stagger: 120ms;
+	--im-pop: 1.05;
+
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: var(--im-ratio, 100 / 108);
+	box-sizing: border-box;
+	container-type: size;
+}
+
+.spw-im__link {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.spw-im *,
+.spw-im *::before,
+.spw-im *::after {
+	box-sizing: border-box;
+}
+
+/* ---------- Tile ---------- */
+
+.spw-im .spw-im__tile {
+	position: absolute;
+	/* Tile box in percent of the mosaic, shrunk by half the gap on every side. */
+	left: calc(var(--x) * 1% + var(--im-gx) / 2);
+	top: calc(var(--y) * 1% + var(--im-gy) / 2);
+	width: calc(var(--w) * 1% - var(--im-gx));
+	height: calc(var(--h) * 1% - var(--im-gy));
+	overflow: hidden;
+	margin: 0;
+	border-radius: var(--im-radius);
+	transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+/* The picture: as big as the whole mosaic, shifted back by the tile position.
+ * Fallback in percent of the tile (when container units are not supported). */
+.spw-im .spw-im__tile img {
+	position: absolute;
+	display: block;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: cover;
+	object-position: var(--im-fx) var(--im-fy);
+	width: calc(10000% / var(--w));
+	height: calc(10000% / var(--h));
+	left: calc(var(--x) / var(--w) * -100%);
+	top: calc(var(--y) / var(--h) * -100%);
+}
+
+@supports (width: 1cqw) {
+	.spw-im .spw-im__tile img {
+		width: 100cqw;
+		height: 100cqh;
+		left: calc(var(--x) * -1cqw - var(--im-gx) / 2);
+		top: calc(var(--y) * -1cqh - var(--im-gy) / 2);
+	}
+}
+
+/* ---------- Shapes ---------- */
+
+.spw-im .spw-im__tile--square  { border-radius: 0; }
+.spw-im .spw-im__tile--circle  { border-radius: 50%; }
+.spw-im .spw-im__tile--pill    { border-radius: 999px; }
+.spw-im .spw-im__tile--arch    { border-radius: 999px 999px 0 0; }
+.spw-im .spw-im__tile--leaf    { border-radius: 70% 0 70% 0; }
+.spw-im .spw-im__tile--hexagon {
+	border-radius: 0;
+	clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+.spw-im .spw-im__tile--diamond {
+	border-radius: 0;
+	clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* ---------- Hover ---------- */
+
+.spw-im.spw-im--pop .spw-im__tile:hover {
+	z-index: 2;
+	transform: scale(var(--im-pop));
+}
+
+/* ---------- Entrance animation ----------
+ * Tiles are only hidden when JS is active (.spw-js), so without JS the
+ * picture is always visible.
+ */
+
+.spw-im.spw-js[class*="spw-im--anim-"]:not(.is-visible) .spw-im__tile {
+	opacity: 0;
+}
+
+.spw-im[class*="spw-im--anim-"].is-visible .spw-im__tile {
+	animation-duration: var(--im-dur);
+	animation-delay: calc(var(--i, 0) * var(--im-stagger));
+	animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+	animation-fill-mode: backwards;
+}
+
+.spw-im.spw-im--anim-fade-in.is-visible .spw-im__tile { animation-name: spw-im-fade-in; }
+.spw-im.spw-im--anim-fade-up.is-visible .spw-im__tile { animation-name: spw-im-fade-up; }
+.spw-im.spw-im--anim-zoom-in.is-visible .spw-im__tile { animation-name: spw-im-zoom-in; }
+
+@keyframes spw-im-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes spw-im-fade-up {
+	from { opacity: 0; transform: translateY(28px); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-im-zoom-in {
+	from { opacity: 0; transform: scale(0.8); }
+	to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-im .spw-im__tile {
+		transition: none;
+	}
+
+	.spw-im[class*="spw-im--anim-"].is-visible .spw-im__tile {
+		animation: none;
+	}
+
+	.spw-im.spw-js[class*="spw-im--anim-"]:not(.is-visible) .spw-im__tile {
+		opacity: 1;
+	}
+}

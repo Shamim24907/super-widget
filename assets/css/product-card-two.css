@@ -1,0 +1,333 @@
+/* Super Widget - Product Card 2
+ * Every rule is prefixed with .spw-pc2 so theme / Elementor resets
+ * (img, a, button, h3...) do not leak in. Elementor style controls
+ * override these defaults. One accent color (--pc2-accent) drives the
+ * badge, the price and the button.
+ */
+
+.spw-pc2 {
+	--pc2-accent: #14827d;
+	--pc2-accent-dark: #0e6662;
+	--pc2-dur: 600ms;
+	--pc2-stagger: 100ms;
+	--pc2-dist: 30px;
+	--pc2-hover-dur: 300ms;
+	--pc2-lift: -8px;
+	--pc2-zoom: 1.06;
+	--pc2-title-lines: 2;
+	--pc2-desc-lines: 2;
+
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 28px;
+	align-items: stretch;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.spw-pc2 *,
+.spw-pc2 *::before,
+.spw-pc2 *::after {
+	box-sizing: border-box;
+}
+
+/* Without Elementor's responsive CSS (plain output) keep a sane grid. */
+@media (max-width: 1024px) {
+	.spw-pc2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+	.spw-pc2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Card ---------- */
+
+.spw-pc2 .spw-pc2__card {
+	--pc2-gap: 14px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--pc2-gap);
+	min-width: 0;
+	height: 100%;
+	margin: 0;
+	padding: 14px 14px 18px;
+	background: #fff;
+	border-radius: 26px;
+	box-shadow: 0 14px 40px rgba(15, 40, 40, 0.12);
+	transition: transform var(--pc2-hover-dur) ease, box-shadow var(--pc2-hover-dur) ease;
+}
+
+.spw-pc2.spw-pc2--lift .spw-pc2__card:hover {
+	transform: translateY(var(--pc2-lift));
+}
+
+/* ---------- Image ---------- */
+
+.spw-pc2 .spw-pc2__media {
+	position: relative;
+	overflow: hidden;
+	aspect-ratio: 1 / 1;
+	border-radius: 20px;
+	background: #f1f6f6;
+}
+
+.spw-pc2 .spw-pc2__media-link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.spw-pc2 .spw-pc2__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	object-fit: contain;
+	transition: transform var(--pc2-hover-dur) ease;
+}
+
+.spw-pc2.spw-pc2--zoom .spw-pc2__card:hover .spw-pc2__media img {
+	transform: scale(var(--pc2-zoom));
+}
+
+/* ---------- Badge ---------- */
+
+.spw-pc2 .spw-pc2__badge {
+	position: absolute;
+	top: 14px;
+	left: 14px;
+	z-index: 2;
+	display: inline-block;
+	max-width: calc(100% - 28px);
+	padding: 7px 14px;
+	overflow: hidden;
+	background: var(--pc2-accent);
+	border-radius: 999px;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* ---------- Body ---------- */
+
+.spw-pc2 .spw-pc2__body {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: calc(var(--pc2-gap) * 0.45);
+	padding: 4px 6px 0;
+	text-align: left;
+}
+
+.spw-pc2 .spw-pc2__title {
+	margin: 0;
+	padding: 0;
+	color: #1d2b2b;
+	font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+	font-size: 22px;
+	font-weight: 600;
+	line-height: 1.3;
+	/* Reserve the same number of lines on every card so rows line up. */
+	min-height: calc(var(--pc2-title-lines) * 1.3em);
+	min-height: calc(var(--pc2-title-lines) * 1lh);
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--pc2-title-lines);
+	line-clamp: var(--pc2-title-lines);
+	overflow: hidden;
+	overflow-wrap: anywhere;
+}
+
+.spw-pc2 .spw-pc2__title a {
+	color: inherit;
+	font: inherit;
+	text-decoration: none;
+	transition: color var(--pc2-hover-dur) ease;
+}
+
+.spw-pc2 .spw-pc2__title a:hover {
+	color: var(--pc2-accent);
+}
+
+.spw-pc2 .spw-pc2__desc {
+	margin: 0;
+	color: #5c6b6b;
+	font-size: 14px;
+	line-height: 1.5;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--pc2-desc-lines);
+	line-clamp: var(--pc2-desc-lines);
+	overflow: hidden;
+}
+
+/* Price sits at the bottom of the body, so prices align across a row. */
+.spw-pc2 .spw-pc2__pricing {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 10px;
+	margin-top: auto;
+}
+
+.spw-pc2 .spw-pc2__price {
+	color: var(--pc2-accent);
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.spw-pc2 .spw-pc2__old-price {
+	color: #8a9797;
+	font-size: 15px;
+	font-weight: 400;
+	text-decoration: line-through;
+}
+
+/* ---------- Button ---------- */
+
+.spw-pc2 .spw-pc2__btn {
+	display: inline-flex;
+	align-items: center;
+	align-self: stretch;
+	justify-content: center;
+	gap: 10px;
+	width: auto;
+	margin: 4px 0 0;
+	padding: 14px 22px;
+	background: var(--pc2-accent);
+	border: 1px solid transparent;
+	border-radius: 999px;
+	box-shadow: none;
+	color: #fff;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	transition: background-color var(--pc2-hover-dur) ease, color var(--pc2-hover-dur) ease, border-color var(--pc2-hover-dur) ease, opacity 0.2s ease;
+}
+
+.spw-pc2 .spw-pc2__btn:hover,
+.spw-pc2 .spw-pc2__btn:focus-visible {
+	background: var(--pc2-accent-dark);
+	color: #fff;
+	text-decoration: none;
+}
+
+.spw-pc2 .spw-pc2__btn:focus-visible {
+	outline: 2px solid var(--pc2-accent);
+	outline-offset: 2px;
+}
+
+.spw-pc2 .spw-pc2__btn[disabled] {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
+.spw-pc2 .spw-pc2__btn.is-loading {
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.spw-pc2 .spw-pc2__btn-icon {
+	display: inline-flex;
+	flex: none;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.spw-pc2 .spw-pc2__btn-icon svg,
+.spw-pc2 .spw-pc2__btn-icon i {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+	font-size: inherit;
+}
+
+/* The built-in cart icon is stroke based. */
+.spw-pc2 .spw-pc2__btn-icon svg[stroke] {
+	fill: none;
+}
+
+/* ---------- Entrance animation ----------
+ * Cards are only hidden when JS is active (.spw-js), so without JS the
+ * content is always visible.
+ */
+
+.spw-pc2.spw-js[class*="spw-pc2--anim-"] .spw-pc2__card:not(.is-visible) {
+	opacity: 0;
+}
+
+.spw-pc2[class*="spw-pc2--anim-"] .spw-pc2__card.is-visible {
+	animation-duration: var(--pc2-dur);
+	animation-delay: calc(var(--spw-i, 0) * var(--pc2-stagger));
+	animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+	animation-fill-mode: backwards;
+}
+
+.spw-pc2.spw-pc2--anim-fade-in .spw-pc2__card.is-visible     { animation-name: spw-pc2-fade-in; }
+.spw-pc2.spw-pc2--anim-fade-up .spw-pc2__card.is-visible     { animation-name: spw-pc2-fade-up; }
+.spw-pc2.spw-pc2--anim-fade-down .spw-pc2__card.is-visible   { animation-name: spw-pc2-fade-down; }
+.spw-pc2.spw-pc2--anim-slide-left .spw-pc2__card.is-visible  { animation-name: spw-pc2-slide-left; }
+.spw-pc2.spw-pc2--anim-slide-right .spw-pc2__card.is-visible { animation-name: spw-pc2-slide-right; }
+.spw-pc2.spw-pc2--anim-zoom-in .spw-pc2__card.is-visible     { animation-name: spw-pc2-zoom-in; }
+
+@keyframes spw-pc2-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes spw-pc2-fade-up {
+	from { opacity: 0; transform: translateY(var(--pc2-dist)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-pc2-fade-down {
+	from { opacity: 0; transform: translateY(calc(var(--pc2-dist) * -1)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-pc2-slide-left {
+	from { opacity: 0; transform: translateX(calc(var(--pc2-dist) * -1)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-pc2-slide-right {
+	from { opacity: 0; transform: translateX(var(--pc2-dist)); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes spw-pc2-zoom-in {
+	from { opacity: 0; transform: scale(0.88); }
+	to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.spw-pc2 .spw-pc2__card,
+	.spw-pc2 .spw-pc2__media img,
+	.spw-pc2 .spw-pc2__btn {
+		transition: none;
+	}
+
+	.spw-pc2[class*="spw-pc2--anim-"] .spw-pc2__card.is-visible {
+		animation: none;
+	}
+
+	.spw-pc2.spw-js[class*="spw-pc2--anim-"] .spw-pc2__card:not(.is-visible) {
+		opacity: 1;
+	}
+}

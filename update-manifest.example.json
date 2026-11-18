@@ -1,0 +1,9 @@
+{
+	"version": "2.6.0",
+	"download_url": "https://example.com/updates/super-widget-2.6.0.zip",
+	"sha256": "64 hex characters, from: sha256sum super-widget-2.6.0.zip",
+	"requires_php": "7.4",
+	"tested": "6.7",
+	"homepage": "https://example.com/super-widget",
+	"changelog": "<p>What is new in this version.</p>"
+}
